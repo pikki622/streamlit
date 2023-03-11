@@ -187,8 +187,7 @@ class MultiCacheResults:
         widget_values = [
             (wid, state[wid]) for wid in sorted(self.widget_ids) if wid in state
         ]
-        widget_key = _make_widget_key(widget_values, cache_type)
-        return widget_key
+        return _make_widget_key(widget_values, cache_type)
 
 
 """
@@ -434,9 +433,10 @@ def replay_cached_messages(
     from streamlit.runtime.state.widgets import register_widget_from_metadata
 
     # Maps originally recorded dg ids to this script run's version of that dg
-    returned_dgs: dict[str, DeltaGenerator] = {}
-    returned_dgs[result.main_id] = st._main
-    returned_dgs[result.sidebar_id] = st.sidebar
+    returned_dgs: dict[str, DeltaGenerator] = {
+        result.main_id: st._main,
+        result.sidebar_id: st.sidebar,
+    }
     ctx = get_script_run_ctx()
 
     try:

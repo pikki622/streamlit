@@ -104,7 +104,7 @@ class MessageCacheHandlerTest(tornado.testing.AsyncHTTPTestCase):
         self._cache.add_message(msg, MagicMock(), 0)
 
         # Cache hit
-        response = self.fetch("/_stcore/message?hash=%s" % msg_hash)
+        response = self.fetch(f"/_stcore/message?hash={msg_hash}")
         self.assertEqual(200, response.code)
         self.assertEqual(serialize_forward_msg(msg), response.body)
 

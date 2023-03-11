@@ -38,9 +38,8 @@ def get_video_files_in_dir(directory):
             name, ext = item.split(".")
         except:
             continue
-        if name and ext:
-            if ext in VIDEO_EXTENSIONS:
-                out.append(item)
+        if name and ext and ext in VIDEO_EXTENSIONS:
+            out.append(item)
     return out
 
 
@@ -49,13 +48,12 @@ files = get_video_files_in_dir(avdir)
 
 if len(files) == 0:
     st.write(
-        "Put some video files in your home directory (%s) to activate this player."
-        % avdir
+        f"Put some video files in your home directory ({avdir}) to activate this player."
     )
 
 else:
     filename = st.selectbox(
-        "Select a video file from your home directory (%s) to play" % avdir,
+        f"Select a video file from your home directory ({avdir}) to play",
         files,
         0,
     )

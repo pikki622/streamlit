@@ -53,9 +53,7 @@ class RadioSerde(Generic[T]):
     index: int
 
     def serialize(self, v: object) -> int:
-        if len(self.options) == 0:
-            return 0
-        return index_(self.options, v)
+        return 0 if len(self.options) == 0 else index_(self.options, v)
 
     def deserialize(
         self,
@@ -222,7 +220,7 @@ class RadioMixin:
 
         if not isinstance(index, int):
             raise StreamlitAPIException(
-                "Radio Value has invalid type: %s" % type(index).__name__
+                f"Radio Value has invalid type: {type(index).__name__}"
             )
 
         if len(opt) > 0 and not 0 <= index < len(opt):

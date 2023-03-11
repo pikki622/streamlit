@@ -54,11 +54,10 @@ def get_current_version():
     pattern = re.compile(regex)
 
     for line in fileinput.input(filename):
-        match = pattern.match(line.rstrip())
-        if match:
+        if match := pattern.match(line.rstrip()):
             return match.groups()[1]
 
-    raise Exception('Did not find regex "%s" for version in setup.py' % (regex))
+    raise Exception(f'Did not find regex "{regex}" for version in setup.py')
 
 
 def main():
@@ -69,7 +68,7 @@ def main():
 
     if len(sys.argv) != 2:
         raise Exception(
-            'Specify target version as an argument: "%s 1.2.3"' % sys.argv[0]
+            f'Specify target version as an argument: "{sys.argv[0]} 1.2.3"'
         )
 
     target_version = semver.VersionInfo.parse(sys.argv[1])

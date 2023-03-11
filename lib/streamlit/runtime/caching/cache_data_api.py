@@ -157,16 +157,14 @@ class DataCaches(CacheStatsProvider):
         # haven't changed.
         with self._caches_lock:
             cache = self._function_caches.get(key)
-            if (
-                cache is not None
-                and cache.ttl_seconds == ttl_seconds
-                and cache.max_entries == max_entries
-                and cache.persist == persist
-            ):
-                return cache
-
-            # Close the existing cache's storage, if it exists.
             if cache is not None:
+                if (
+                    cache.ttl_seconds == ttl_seconds
+                    and cache.max_entries == max_entries
+                    and cache.persist == persist
+                ):
+                    return cache
+
                 _LOGGER.debug(
                     "Closing existing DataCache storage "
                     "(key=%s, persist=%s, max_entries=%s, ttl=%s) "
@@ -290,11 +288,10 @@ class DataCaches(CacheStatsProvider):
     def get_storage_manager(self) -> CacheStorageManager:
         if runtime.exists():
             return runtime.get_instance().cache_storage_manager
-        else:
-            # When running in "raw mode", we can't access the CacheStorageManager,
-            # so we're falling back to InMemoryCache.
-            _LOGGER.warning("No runtime found, using MemoryCacheStorageManager")
-            return MemoryCacheStorageManager()
+        # When running in "raw mode", we can't access the CacheStorageManager,
+        # so we're falling back to InMemoryCache.
+        _LOGGER.warning("No runtime found, using MemoryCacheStorageManager")
+        return MemoryCacheStorageManager()
 
 
 # Singleton DataCaches instance
@@ -673,6 +670,5 @@ class DataCache(Cache):
 
         if isinstance(maybe_results, MultiCacheResults):
             return maybe_results
-        else:
-            self.storage.delete(key)
-            raise CacheKeyNotFoundError()
+        self.storage.delete(key)
+        raise CacheKeyNotFoundError()

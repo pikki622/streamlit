@@ -80,10 +80,7 @@ class BrowserWebSocketHandler(WebSocketHandler, SessionClient):
         by convention have the client always set the first protocol to "streamlit" and
         select that.
         """
-        if subprotocols:
-            return subprotocols[0]
-
-        return None
+        return subprotocols[0] if subprotocols else None
 
     def open(self, *args, **kwargs) -> Optional[Awaitable[None]]:
         # Extract user info from the X-Streamlit-User header
@@ -98,12 +95,9 @@ class BrowserWebSocketHandler(WebSocketHandler, SessionClient):
         except (KeyError, binascii.Error, json.decoder.JSONDecodeError):
             email = "test@localhost.com"
 
-        user_info: Dict[str, Optional[str]] = dict()
-        if is_public_cloud_app:
-            user_info["email"] = None
-        else:
-            user_info["email"] = email
-
+        user_info: Dict[str, Optional[str]] = {
+            "email": None if is_public_cloud_app else email
+        }
         existing_session_id = None
         try:
             ws_protocols = [
@@ -141,9 +135,7 @@ class BrowserWebSocketHandler(WebSocketHandler, SessionClient):
 
         (See the docstring in the parent class.)
         """
-        if config.get_option("server.enableWebsocketCompression"):
-            return {}
-        return None
+        return {} if config.get_option("server.enableWebsocketCompression") else None
 
     def on_message(self, payload: Union[str, bytes]) -> None:
         if not self._session_id:

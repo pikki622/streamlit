@@ -15,11 +15,9 @@
 import streamlit as st
 from streamlit import runtime
 
-if runtime.exists():
+if runtime.exists() and st.checkbox("checkbox 1"):
+    if st.checkbox("checkbox 2"):
+        st.write("hello")
 
-    if st.checkbox("checkbox 1"):
-        if st.checkbox("checkbox 2"):
-            st.write("hello")
-
-        if st.checkbox("checkbox 3", key="c3"):
-            st.write("goodbye")
+    if st.checkbox("checkbox 3", key="c3"):
+        st.write("goodbye")

@@ -117,24 +117,20 @@ def _ensure_no_embed_params(
     all_current_params = parse.parse_qs(query_string)
     current_embed_params = parse.urlencode(
         {
-            EMBED_QUERY_PARAM: [
-                param
-                for param in util.extract_key_query_params(
+            EMBED_QUERY_PARAM: list(
+                util.extract_key_query_params(
                     all_current_params, param_key=EMBED_QUERY_PARAM
                 )
-            ],
-            EMBED_OPTIONS_QUERY_PARAM: [
-                param
-                for param in util.extract_key_query_params(
+            ),
+            EMBED_OPTIONS_QUERY_PARAM: list(
+                util.extract_key_query_params(
                     all_current_params, param_key=EMBED_OPTIONS_QUERY_PARAM
                 )
-            ],
+            ),
         },
         doseq=True,
     )
-    query_string = parse.urlencode(query_params, doseq=True)
-
-    if query_string:
+    if query_string := parse.urlencode(query_params, doseq=True):
         separator = "&" if current_embed_params else ""
         return separator.join([query_string, current_embed_params])
     return current_embed_params

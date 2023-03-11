@@ -51,7 +51,7 @@ DownloadButtonDataType = Union[str, bytes, TextIO, BinaryIO, io.RawIOBase]
 @dataclass
 class ButtonSerde:
     def serialize(self, v: bool) -> bool:
-        return bool(v)
+        return v
 
     def deserialize(self, ui_value: Optional[bool], widget_id: str = "") -> bool:
         return ui_value or False
@@ -467,7 +467,6 @@ def marshall_file(
         string_data = data.read()
         data_as_bytes = string_data.encode()
         mimetype = mimetype or "text/plain"
-    # Assume bytes; try methods until we run out.
     elif isinstance(data, bytes):
         data_as_bytes = data
         mimetype = mimetype or "application/octet-stream"
@@ -484,7 +483,7 @@ def marshall_file(
         data_as_bytes = data.read() or b""
         mimetype = mimetype or "application/octet-stream"
     else:
-        raise RuntimeError("Invalid binary data format: %s" % type(data))
+        raise RuntimeError(f"Invalid binary data format: {type(data)}")
 
     if runtime.exists():
         file_url = runtime.get_instance().media_file_mgr.add(

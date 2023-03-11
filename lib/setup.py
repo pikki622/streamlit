@@ -89,15 +89,7 @@ class VerifyVersionCommand(install):
 
 
 readme_path = THIS_DIRECTORY / ".." / "README.md"
-if readme_path.exists():
-    long_description = readme_path.read_text()
-else:
-    # In some build environments (specifically in conda), we may not have the README file
-    # readily available. In these cases, just let long_description be the empty string.
-    # Note that long_description isn't used at all in these build environments, so it
-    # being missing isn't problematic.
-    long_description = ""
-
+long_description = readme_path.read_text() if readme_path.exists() else ""
 setuptools.setup(
     name=NAME,
     version=VERSION,

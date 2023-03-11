@@ -375,7 +375,7 @@ class CacheTest(DeltaGeneratorTestCase):
 
         # This is an external object that's referenced by our
         # function. It cannot be hashed (without a custom hashfunc).
-        dict_gen = {1: (x for x in range(1))}
+        dict_gen = {1: iter(range(1))}
 
         @st.cache(hash_funcs={"builtins.generator": hash_func})
         def foo(arg):
@@ -557,15 +557,15 @@ Object of type tests.streamlit.runtime.legacy_caching.caching_test.NotHashable:
     def test_hash_funcs_acceptable_keys(self):
         @st.cache
         def unhashable_type_func():
-            return (x for x in range(1))
+            return iter(range(1))
 
         @st.cache(hash_funcs={types.GeneratorType: id})
         def hf_key_as_type():
-            return (x for x in range(1))
+            return iter(range(1))
 
         @st.cache(hash_funcs={"builtins.generator": id})
         def hf_key_as_str():
-            return (x for x in range(1))
+            return iter(range(1))
 
         with self.assertRaises(hashing.UnhashableTypeError) as cm:
             unhashable_type_func()

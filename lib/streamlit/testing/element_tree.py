@@ -282,10 +282,9 @@ class Radio(Element, Widget, Generic[T]):
         """The currently selected value from the options."""
         if self._value is not None:
             return self._value
-        else:
-            state = self.root.session_state
-            assert state
-            return cast(T, state[self.id])
+        state = self.root.session_state
+        assert state
+        return cast(T, state[self.id])
 
     def set_value(self, v: T) -> Radio[T]:
         self._value = v
@@ -340,10 +339,9 @@ class Checkbox(Element, Widget):
     def value(self) -> bool:
         if self._value is not None:
             return self._value
-        else:
-            state = self.root.session_state
-            assert state
-            return cast(bool, state[self.id])
+        state = self.root.session_state
+        assert state
+        return cast(bool, state[self.id])
 
     def set_value(self, v: bool) -> Checkbox:
         self._value = v
@@ -403,10 +401,9 @@ class Multiselect(Element, Widget, Generic[T]):
         """The currently selected values from the options."""
         if self._value is not None:
             return self._value
-        else:
-            state = self.root.session_state
-            assert state
-            return cast(List[T], state[self.id])
+        state = self.root.session_state
+        assert state
+        return cast(List[T], state[self.id])
 
     @property
     def indices(self) -> Sequence[int]:
@@ -425,24 +422,20 @@ class Multiselect(Element, Widget, Generic[T]):
 
     def select(self, v: T) -> Multiselect[T]:
         current = self.value
-        if v in current:
-            return self
-        else:
+        if v not in current:
             new = current.copy()
             new.append(v)
             self.set_value(new)
-            return self
+        return self
 
     def unselect(self, v: T) -> Multiselect[T]:
         current = self.value
-        if v not in current:
-            return self
-        else:
+        if v in current:
             new = current.copy()
             while v in new:
                 new.remove(v)
             self.set_value(new)
-            return self
+        return self
 
 
 @dataclass(init=False)
@@ -477,19 +470,16 @@ class Selectbox(Element, Widget, Generic[T]):
 
     @property
     def index(self) -> int:
-        if len(self.options) == 0:
-            return 0
-        return self.options.index(str(self.value))
+        return 0 if len(self.options) == 0 else self.options.index(str(self.value))
 
     @property
     def value(self) -> T:
         """The currently selected value from the options."""
         if self._value is not None:
             return self._value
-        else:
-            state = self.root.session_state
-            assert state
-            return cast(T, state[self.id])
+        state = self.root.session_state
+        assert state
+        return cast(T, state[self.id])
 
     def set_value(self, v: T) -> Selectbox[T]:
         """
@@ -556,10 +546,9 @@ class Button(Element, Widget):
     def value(self) -> bool:
         if self._value:
             return self._value
-        else:
-            state = self.root.session_state
-            assert state
-            return cast(bool, state[self.id])
+        state = self.root.session_state
+        assert state
+        return cast(bool, state[self.id])
 
     def set_value(self, v: bool) -> Button:
         self._value = v
@@ -626,11 +615,10 @@ class Slider(Element, Widget, Generic[SliderScalarT]):
         """The currently selected value or range."""
         if self._value is not None:
             return self._value
-        else:
-            state = self.root.session_state
-            assert state
-            # Awkward to do this with `cast`
-            return state[self.id]  # type: ignore
+        state = self.root.session_state
+        assert state
+        # Awkward to do this with `cast`
+        return state[self.id]  # type: ignore
 
     def set_range(
         self, lower: SliderScalarT, upper: SliderScalarT
@@ -688,11 +676,10 @@ class SelectSlider(Element, Widget, Generic[T]):
         """The currently selected value or range."""
         if self._value is not None:
             return self._value
-        else:
-            state = self.root.session_state
-            assert state
-            # Awkward to do this with `cast`
-            return state[self.id]  # type: ignore
+        state = self.root.session_state
+        assert state
+        # Awkward to do this with `cast`
+        return state[self.id]  # type: ignore
 
     def set_range(self, lower: T, upper: T) -> SelectSlider[T]:
         return self.set_value([lower, upper])
@@ -730,8 +717,7 @@ class Block:
     def __iter__(self):
         yield self
         for child_idx in self.children:
-            for c in self.children[child_idx]:
-                yield c
+            yield from self.children[child_idx]
 
     def __getitem__(self, k: int) -> Node:
         return self.children[k]

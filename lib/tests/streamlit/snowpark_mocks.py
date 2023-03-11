@@ -35,8 +35,7 @@ class _SnowparkDataLikeBaseClass:
     def take(self, n: int):
         """Returns n element of fake Data like, which imitates take of snowflake.snowpark.dataframe.DataFrame"""
         self._lazy_evaluation()
-        if n > self._num_of_rows:
-            n = self._num_of_rows
+        n = min(n, self._num_of_rows)
         return self._data[:n]
 
     def collect(self) -> List[List[int]]:
@@ -60,15 +59,11 @@ class _SnowparkDataLikeBaseClass:
                 self._data = self._random_data()
 
     def _random_data(self) -> List[List[int]]:
-        data: List[List[int]] = []
-        for _ in range(0, self._num_of_rows):
-            data.append(self._random_row())
+        data: List[List[int]] = [self._random_row() for _ in range(self._num_of_rows)]
         return data
 
     def _random_row(self) -> List[int]:
-        row: List[int] = []
-        for _ in range(0, self._num_of_cols):
-            row.append(random.randint(1, 1000000))
+        row: List[int] = [random.randint(1, 1000000) for _ in range(self._num_of_cols)]
         return row
 
 

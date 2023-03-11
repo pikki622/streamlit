@@ -159,7 +159,7 @@ class InteractiveScriptTest(InteractiveScriptTests):
         )
         sr = script.run()
         assert len(sr.get("radio")) == 1
-        assert sr.get_widget("conditional") == None
+        assert sr.get_widget("conditional") is None
 
         sr2 = sr.get_widget("cb").set_value("on").run()
         assert len(sr2.get("radio")) == 2
@@ -171,7 +171,7 @@ class InteractiveScriptTest(InteractiveScriptTests):
 
         sr4 = sr3.get_widget("cb").set_value("off").run()
         assert len(sr4.get("radio")) == 1
-        assert sr4.get_widget("conditional") == None
+        assert sr4.get_widget("conditional") is None
 
         sr5 = sr4.get_widget("cb").set_value("on").run()
         assert len(sr5.get("radio")) == 2

@@ -111,14 +111,14 @@ class InMemoryCacheStorageWrapper(CacheStorage):
         stats = []
 
         with self._mem_cache_lock:
-            for item in self._mem_cache.values():
-                stats.append(
-                    CacheStat(
-                        category_name="st_cache_data",
-                        cache_name=self.function_display_name,
-                        byte_length=len(item),
-                    )
+            stats.extend(
+                CacheStat(
+                    category_name="st_cache_data",
+                    cache_name=self.function_display_name,
+                    byte_length=len(item),
                 )
+                for item in self._mem_cache.values()
+            )
         return stats
 
     def close(self) -> None:

@@ -130,7 +130,7 @@ class UploadFileRequestHandler(tornado.web.RequestHandler):
         # The file_mgr will assign unique file IDs and return in `add_file`,
         # below.
         uploaded_files: List[UploadedFileRec] = []
-        for _, flist in files.items():
+        for flist in files.values():
             for file in flist:
                 uploaded_files.append(
                     UploadedFileRec(

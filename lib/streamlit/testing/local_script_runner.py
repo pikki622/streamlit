@@ -110,14 +110,15 @@ class LocalScriptRunner(ScriptRunner):
         return tree
 
     def script_stopped(self) -> bool:
-        for e in self.events:
-            if e in (
+        return any(
+            e
+            in (
                 ScriptRunnerEvent.SCRIPT_STOPPED_FOR_RERUN,
                 ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR,
                 ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
-            ):
-                return True
-        return False
+            )
+            for e in self.events
+        )
 
 
 def require_widgets_deltas(runner: LocalScriptRunner, timeout: float = 3) -> None:

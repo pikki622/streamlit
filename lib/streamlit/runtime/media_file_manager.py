@@ -29,13 +29,7 @@ def _get_session_id() -> str:
     from streamlit.runtime.scriptrunner import get_script_run_ctx
 
     ctx = get_script_run_ctx()
-    if ctx is None:
-        # This is only None when running "python myscript.py" rather than
-        # "streamlit run myscript.py". In which case the session ID doesn't
-        # matter and can just be a constant, as there's only ever "session".
-        return "dontcare"
-    else:
-        return ctx.session_id
+    return "dontcare" if ctx is None else ctx.session_id
 
 
 class MediaFileMetadata:
@@ -80,7 +74,7 @@ class MediaFileManager:
         self._storage = storage
 
         # Dict of [file_id -> MediaFileMetadata]
-        self._file_metadata: Dict[str, MediaFileMetadata] = dict()
+        self._file_metadata: Dict[str, MediaFileMetadata] = {}
 
         # Dict[session ID][coordinates] -> file_id.
         self._files_by_session_and_coord: Dict[
@@ -118,13 +112,15 @@ class MediaFileManager:
         with self._lock:
             for file_id in self._get_inactive_file_ids():
                 file = self._file_metadata[file_id]
-                if file.kind == MediaFileKind.MEDIA:
+                if (
+                    file.kind != MediaFileKind.MEDIA
+                    and file.kind == MediaFileKind.DOWNLOADABLE
+                    and file.is_marked_for_delete
+                    or file.kind == MediaFileKind.MEDIA
+                ):
                     self._delete_file(file_id)
                 elif file.kind == MediaFileKind.DOWNLOADABLE:
-                    if file.is_marked_for_delete:
-                        self._delete_file(file_id)
-                    else:
-                        file.mark_for_delete()
+                    file.mark_for_delete()
 
     def _delete_file(self, file_id: str) -> None:
         """Delete the given file from storage, and remove its metadata from

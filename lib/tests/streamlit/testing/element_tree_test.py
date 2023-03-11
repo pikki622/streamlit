@@ -90,11 +90,11 @@ class MultiselectTest(InteractiveScriptTests):
 
         sr3 = sr2.get("multiselect")[1].select("zero").select("one").run()
         assert sr3.get("multiselect")[0].value == ["b"]
-        assert set(sr3.get("multiselect")[1].value) == set(["zero", "one", "two"])
+        assert set(sr3.get("multiselect")[1].value) == {"zero", "one", "two"}
 
         sr4 = sr3.get("multiselect")[0].unselect("b").run()
         assert sr4.get("multiselect")[0].value == []
-        assert set(sr3.get("multiselect")[1].value) == set(["zero", "one", "two"])
+        assert set(sr3.get("multiselect")[1].value) == {"zero", "one", "two"}
 
 
 class MarkdownTest(InteractiveScriptTests):

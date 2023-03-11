@@ -279,8 +279,8 @@ def _get_css_styles(translated_style: Dict[Any, Any]) -> Dict[Any, Any]:
                 raise RuntimeError(
                     f'Failed to parse cellstyle selector "{cell_selector}"'
                 )
-            row = int(match.group(1))
-            col = int(match.group(2))
+            row = int(match[1])
+            col = int(match[2])
             css_declarations = []
             props = cell_style["props"]
             for prop in props:
@@ -349,14 +349,14 @@ def _get_custom_display_values(translated_style: Dict[Any, Any]) -> Dict[Any, An
                     found_row_header = True
                     continue
                 else:
-                    raise RuntimeError('Found unexpected row header "%s"' % cell)
+                    raise RuntimeError(f'Found unexpected row header "{cell}"')
             match = cell_selector_regex.match(cell_id)
             if not match:
-                raise RuntimeError('Failed to parse cell selector "%s"' % cell_id)
+                raise RuntimeError(f'Failed to parse cell selector "{cell_id}"')
 
             if has_custom_display_value(cell):
-                row = int(match.group(1))
-                col = int(match.group(2))
+                row = int(match[1])
+                col = int(match[2])
                 display_values[(row, col)] = str(cell["display_value"])
 
     return display_values
@@ -406,7 +406,7 @@ def _marshall_index(pandas_index, proto_index) -> None:
     elif type(pandas_index) == pd.Float64Index:
         proto_index.float_64_index.data.data.extend(pandas_index)
     else:
-        raise NotImplementedError("Can't handle %s yet." % type(pandas_index))
+        raise NotImplementedError(f"Can't handle {type(pandas_index)} yet.")
 
 
 def _marshall_table(pandas_table, proto_table) -> None:
@@ -448,18 +448,11 @@ def _marshall_any_array(pandas_array, proto_array) -> None:
         proto_array.int64s.data.extend(pandas_array)
     elif pandas_array.dtype == np.object_:
         proto_array.strings.data.extend(map(str, pandas_array))
-    # dtype='string', <class 'pandas.core.arrays.string_.StringDtype'>
-    # NOTE: StringDtype is considered experimental.
-    # The implementation and parts of the API may change without warning.
     elif pandas_array.dtype.name == "string":
         proto_array.strings.data.extend(map(str, pandas_array))
-    # Setting a timezone changes (dtype, dtype.type) from
-    #   'datetime64[ns]', <class 'numpy.datetime64'>
-    # to
-    #   datetime64[ns, UTC], <class 'pandas._libs.tslibs.timestamps.Timestamp'>
     elif pandas_array.dtype.name.startswith("datetime64"):
         # Just convert straight to ISO 8601, preserving timezone
         # awareness/unawareness. The frontend will render it correctly.
         proto_array.datetimes.data.extend(pandas_array.map(datetime.datetime.isoformat))
     else:
-        raise NotImplementedError("Dtype %s not understood." % pandas_array.dtype)
+        raise NotImplementedError(f"Dtype {pandas_array.dtype} not understood.")

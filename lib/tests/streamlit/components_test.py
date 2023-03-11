@@ -93,7 +93,7 @@ class DeclareComponentTest(unittest.TestCase):
         """Succeed when a path is provided."""
 
         def isdir(path):
-            return path == PATH or path == os.path.abspath(PATH)
+            return path in [PATH, os.path.abspath(PATH)]
 
         with mock.patch(
             "streamlit.components.v1.components.os.path.isdir", side_effect=isdir

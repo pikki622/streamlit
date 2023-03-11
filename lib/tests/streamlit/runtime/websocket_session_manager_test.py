@@ -178,10 +178,7 @@ class WebsocketSessionManagerTests(unittest.TestCase):
         assert not self.session_mgr.is_active_session(session_id)
 
     def test_list_active_sessions(self):
-        session_ids = []
-        for _ in range(3):
-            session_ids.append(self.connect_session())
-
+        session_ids = [self.connect_session() for _ in range(3)]
         assert [
             s.session.id for s in self.session_mgr.list_active_sessions()
         ] == session_ids
@@ -234,10 +231,7 @@ class WebsocketSessionManagerTests(unittest.TestCase):
         assert self.session_mgr.get_session_info("nonexistent_session") is None
 
     def test_list_sessions(self):
-        session_ids = []
-        for _ in range(3):
-            session_ids.append(self.connect_session())
-
+        session_ids = [self.connect_session() for _ in range(3)]
         self.session_mgr.disconnect_session(session_ids[1])
 
         # Sanity check.

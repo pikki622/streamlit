@@ -158,7 +158,7 @@ class ImageMixin:
 
         if use_column_width == "auto" or (use_column_width is None and width is None):
             width = WidthBehaviour.AUTO
-        elif use_column_width == "always" or use_column_width == True:
+        elif use_column_width in ["always", True]:
             width = WidthBehaviour.COLUMN
         elif width is None:
             width = WidthBehaviour.ORIGINAL
@@ -185,14 +185,11 @@ class ImageMixin:
 
 
 def _image_may_have_alpha_channel(image: PILImage) -> bool:
-    if image.mode in ("RGBA", "LA", "P"):
-        return True
-    else:
-        return False
+    return image.mode in ("RGBA", "LA", "P")
 
 
 def _image_is_gif(image: PILImage) -> bool:
-    return bool(image.format == "GIF")
+    return image.format == "GIF"
 
 
 def _validate_image_format_string(
@@ -206,7 +203,7 @@ def _validate_image_format_string(
     "GIF" if the image is a GIF, and "JPEG" otherwise.
     """
     format = format.upper()
-    if format == "JPEG" or format == "PNG":
+    if format in {"JPEG", "PNG"}:
         return cast(ImageFormat, format)
 
     # We are forgiving on the spelling of JPEG
@@ -221,10 +218,7 @@ def _validate_image_format_string(
     if _image_is_gif(pil_image):
         return "GIF"
 
-    if _image_may_have_alpha_channel(pil_image):
-        return "PNG"
-
-    return "JPEG"
+    return "PNG" if _image_may_have_alpha_channel(pil_image) else "JPEG"
 
 
 def _PIL_to_bytes(
@@ -257,7 +251,7 @@ def _np_array_to_bytes(array: "npt.NDArray[Any]", output_format="JPEG") -> bytes
 
 
 def _4d_to_list_3d(array: "npt.NDArray[Any]") -> List["npt.NDArray[Any]"]:
-    return [array[i, :, :, :] for i in range(0, array.shape[0])]
+    return [array[i, :, :, :] for i in range(array.shape[0])]
 
 
 def _verify_np_shape(array: "npt.NDArray[Any]") -> "npt.NDArray[Any]":
@@ -314,16 +308,13 @@ def _clip_image(image: "npt.NDArray[Any]", clamp: bool) -> "npt.NDArray[Any]":
     if issubclass(image.dtype.type, np.floating):
         if clamp:
             data = np.clip(image, 0, 1.0)
-        else:
-            if np.amin(image) < 0.0 or np.amax(image) > 1.0:
-                raise RuntimeError("Data is outside [0.0, 1.0] and clamp is not set.")
+        elif np.amin(image) < 0.0 or np.amax(image) > 1.0:
+            raise RuntimeError("Data is outside [0.0, 1.0] and clamp is not set.")
         data = data * 255
-    else:
-        if clamp:
-            data = np.clip(image, 0, 255)
-        else:
-            if np.amin(image) < 0 or np.amax(image) > 255:
-                raise RuntimeError("Data is outside [0, 255] and clamp is not set.")
+    elif clamp:
+        data = np.clip(image, 0, 255)
+    elif np.amin(image) < 0 or np.amax(image) > 255:
+        raise RuntimeError("Data is outside [0, 255] and clamp is not set.")
     return data
 
 
@@ -487,18 +478,14 @@ def marshall_images(
 
     if type(caption) is list:
         captions: Sequence[Optional[str]] = caption
+    elif isinstance(caption, str):
+        captions = [caption]
+    elif isinstance(caption, np.ndarray) and len(caption.shape) == 1:
+        captions = caption.tolist()
+    elif caption is None:
+        captions = [None] * len(images)
     else:
-        if isinstance(caption, str):
-            captions = [caption]
-        # You can pass in a 1-D Numpy array as captions.
-        elif isinstance(caption, np.ndarray) and len(caption.shape) == 1:
-            captions = caption.tolist()
-        # If there are no captions then make the captions list the same size
-        # as the images list.
-        elif caption is None:
-            captions = [None] * len(images)
-        else:
-            captions = [str(caption)]
+        captions = [str(caption)]
 
     assert type(captions) == list, "If image is a list then caption should be as well"
     assert len(captions) == len(images), "Cannot pair %d captions with %d images." % (

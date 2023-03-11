@@ -394,11 +394,10 @@ dtype: object""",
 
         class DummyClass:
             """DummyClass for testing purposes"""
-
         self.assertFalse(is_snowpark_data_object(DummyClass()))
 
         # empty list should not be snowpark dataframe
-        self.assertFalse(is_snowpark_data_object(list()))
+        self.assertFalse(is_snowpark_data_object([]))
 
         # list with items should not be snowpark dataframe
         self.assertFalse(

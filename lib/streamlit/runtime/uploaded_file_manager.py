@@ -53,9 +53,11 @@ class UploadedFile(io.BytesIO):
         self.size = len(record.data)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, UploadedFile):
-            return NotImplemented
-        return self.id == other.id
+        return (
+            self.id == other.id
+            if isinstance(other, UploadedFile)
+            else NotImplemented
+        )
 
     def __repr__(self) -> str:
         return util.repr_(self)
@@ -230,7 +232,7 @@ class UploadedFileManager(CacheStatsProvider):
             num_removed = len(file_list) - len(new_list)
 
         if num_removed > 0:
-            LOGGER.debug("Removed %s orphaned files" % num_removed)
+            LOGGER.debug(f"Removed {num_removed} orphaned files")
 
     def remove_file(self, session_id: str, widget_id: str, file_id: int) -> bool:
         """Remove the file list with the given ID, if it exists.

@@ -319,7 +319,7 @@ def _get_data_frame(delta: Delta, name: Optional[str] = None) -> DataFrame:
 
         # Some element types don't support named datasets.
         if name and element_type in ("data_frame", "table", "chart"):
-            raise ValueError("Dataset names not supported for st.%s" % element_type)
+            raise ValueError(f"Dataset names not supported for st.{element_type}")
 
         if element_type in "data_frame":
             return delta.new_element.data_frame
@@ -338,15 +338,15 @@ def _get_data_frame(delta: Delta, name: Optional[str] = None) -> DataFrame:
                 return chart_proto.datasets[0].data
             else:
                 return chart_proto.data
-        # TODO: Support DeckGL. Need to figure out how to handle layer indices
-        # first.
+            # TODO: Support DeckGL. Need to figure out how to handle layer indices
+            # first.
 
     elif delta_type == "add_rows":
         if delta.add_rows.has_name and name != delta.add_rows.name:
-            raise ValueError('No dataset found with name "%s".' % name)
+            raise ValueError(f'No dataset found with name "{name}".')
         return delta.add_rows.data
     else:
-        raise ValueError("Cannot extract DataFrame from %s." % delta_type)
+        raise ValueError(f"Cannot extract DataFrame from {delta_type}.")
 
 
 def _get_or_create_dataset(datasets_proto, name):

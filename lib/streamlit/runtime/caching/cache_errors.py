@@ -29,7 +29,7 @@ CACHE_DOCS_URL = "https://docs.streamlit.io/library/advanced-features/caching"
 def get_cached_func_name_md(func: Any) -> str:
     """Get markdown representation of the function name."""
     if hasattr(func, "__name__"):
-        return "`%s()`" % func.__name__
+        return f"`{func.__name__}()`"
     elif hasattr(type(func), "__name__"):
         return f"`{type(func).__name__}`"
     return f"`{type(func)}`"
@@ -127,7 +127,7 @@ to enable widget replay and suppress this warning.
     def _get_cached_func_name_md(func: types.FunctionType) -> str:
         """Get markdown representation of the function name."""
         if hasattr(func, "__name__"):
-            return "`%s()`" % func.__name__
+            return f"`{func.__name__}()`"
         else:
             return "a cached function"
 

@@ -64,9 +64,7 @@ class CustomComponent:
     @property
     def abspath(self) -> Optional[str]:
         """The absolute path that the component is served from."""
-        if self.path is None:
-            return None
-        return os.path.abspath(self.path)
+        return None if self.path is None else os.path.abspath(self.path)
 
     def __call__(
         self,
@@ -109,7 +107,7 @@ class CustomComponent:
             The component's widget value.
 
         """
-        if len(args) > 0:
+        if args:
             raise MarshallComponentException(f"Argument '{args[0]}' needs a label")
 
         try:

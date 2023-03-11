@@ -244,9 +244,7 @@ class Runtime:
         Threading: SAFE. May be called on any thread.
         """
         session_info = self._session_mgr.get_active_session_info(session_id)
-        if session_info is None:
-            return None
-        return session_info.client
+        return None if session_info is None else session_info.client
 
     def _on_files_updated(self, session_id: str) -> None:
         """Event handler for UploadedFileManager.on_file_added.
@@ -561,9 +559,7 @@ class Runtime:
         try:
             if self._state == RuntimeState.INITIAL:
                 self._set_state(RuntimeState.NO_SESSIONS_CONNECTED)
-            elif self._state == RuntimeState.ONE_OR_MORE_SESSIONS_CONNECTED:
-                pass
-            else:
+            elif self._state != RuntimeState.ONE_OR_MORE_SESSIONS_CONNECTED:
                 raise RuntimeError(f"Bad Runtime state at start: {self._state}")
 
             # Signal that we're started and ready to accept sessions

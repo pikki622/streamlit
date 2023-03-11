@@ -352,12 +352,8 @@ class AppSession:
                 # immediately.
                 self._scriptrunner.request_stop()
                 self._scriptrunner = None
-            else:
-                # fastReruns is not enabled. Send our ScriptRunner a rerun
-                # request. If the request is accepted, we're done.
-                success = self._scriptrunner.request_rerun(rerun_data)
-                if success:
-                    return
+            elif success := self._scriptrunner.request_rerun(rerun_data):
+                return
 
         # If we are here, then either we have no ScriptRunner, or our
         # current ScriptRunner is shutting down and cannot handle a rerun
@@ -522,10 +518,10 @@ class AppSession:
                 self._create_new_session_message(page_script_hash)
             )
 
-        elif (
-            event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS
-            or event == ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR
-        ):
+        elif event in [
+            ScriptRunnerEvent.SCRIPT_STOPPED_WITH_SUCCESS,
+            ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR,
+        ]:
             if self._state != AppSessionState.SHUTDOWN_REQUESTED:
                 self._state = AppSessionState.APP_NOT_RUNNING
 
@@ -752,16 +748,16 @@ def _populate_theme_msg(msg: CustomThemeConfig) -> None:
         if option_name not in enum_encoded_options and option_val is not None:
             setattr(msg, to_snake_case(option_name), option_val)
 
-    # NOTE: If unset, base and font will default to the protobuf enum zero
-    # values, which are BaseTheme.LIGHT and FontFamily.SANS_SERIF,
-    # respectively. This is why we both don't handle the cases explicitly and
-    # also only log a warning when receiving invalid base/font options.
-    base_map = {
-        "light": msg.BaseTheme.LIGHT,
-        "dark": msg.BaseTheme.DARK,
-    }
     base = theme_opts["base"]
     if base is not None:
+        # NOTE: If unset, base and font will default to the protobuf enum zero
+        # values, which are BaseTheme.LIGHT and FontFamily.SANS_SERIF,
+        # respectively. This is why we both don't handle the cases explicitly and
+        # also only log a warning when receiving invalid base/font options.
+        base_map = {
+            "light": msg.BaseTheme.LIGHT,
+            "dark": msg.BaseTheme.DARK,
+        }
         if base not in base_map:
             LOGGER.warning(
                 f'"{base}" is an invalid value for theme.base.'
@@ -771,13 +767,13 @@ def _populate_theme_msg(msg: CustomThemeConfig) -> None:
         else:
             msg.base = base_map[base]
 
-    font_map = {
-        "sans serif": msg.FontFamily.SANS_SERIF,
-        "serif": msg.FontFamily.SERIF,
-        "monospace": msg.FontFamily.MONOSPACE,
-    }
     font = theme_opts["font"]
     if font is not None:
+        font_map = {
+            "sans serif": msg.FontFamily.SANS_SERIF,
+            "serif": msg.FontFamily.SERIF,
+            "monospace": msg.FontFamily.MONOSPACE,
+        }
         if font not in font_map:
             LOGGER.warning(
                 f'"{font}" is an invalid value for theme.font.'

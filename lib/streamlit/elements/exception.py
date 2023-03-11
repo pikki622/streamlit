@@ -228,12 +228,11 @@ def _get_stack_trace_str_list(
             "Cannot extract the stack trace for this exception. "
             "Try calling exception() within the `catch` block."
         ]
+    elif strip_streamlit_stack_entries:
+        extracted_frames = _get_nonstreamlit_traceback(extracted_traceback)
+        stack_trace_str_list = traceback.format_list(extracted_frames)
     else:
-        if strip_streamlit_stack_entries:
-            extracted_frames = _get_nonstreamlit_traceback(extracted_traceback)
-            stack_trace_str_list = traceback.format_list(extracted_frames)
-        else:
-            stack_trace_str_list = traceback.format_list(extracted_traceback)
+        stack_trace_str_list = traceback.format_list(extracted_traceback)
 
     stack_trace_str_list = [item.strip() for item in stack_trace_str_list]
 

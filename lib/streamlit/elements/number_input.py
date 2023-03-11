@@ -50,12 +50,7 @@ class NumberInputSerde:
         return v
 
     def deserialize(self, ui_value: Optional[Number], widget_id: str = "") -> Number:
-        if ui_value is not None:
-            val = ui_value
-        else:
-            # Widget has not been used; fallback to the original value,
-            val = self.value
-
+        val = ui_value if ui_value is not None else self.value
         if self.data_type == NumberInputProto.INT:
             val = int(val)
 
@@ -235,39 +230,35 @@ class NumberInputMixin:
         if isinstance(value, NoValue):
             if min_value is not None:
                 value = min_value
-            elif int_args and float_args:
+            elif int_args and float_args or not int_args:
                 value = 0.0  # if no values are provided, defaults to float
-            elif int_args:
-                value = 0
             else:
-                value = 0.0
-
+                value = 0
         int_value = isinstance(value, numbers.Integral)
-        float_value = isinstance(value, float)
-
         if value is None:
             raise StreamlitAPIException(
                 "Default value for number_input should be an int or a float."
             )
-        else:
-            if format is None:
-                format = "%d" if int_value else "%0.2f"
+        if format is None:
+            format = "%d" if int_value else "%0.2f"
 
-            # Warn user if they format an int type as a float or vice versa.
-            if format in ["%d", "%u", "%i"] and float_value:
-                import streamlit as st
+        float_value = isinstance(value, float)
 
-                st.warning(
-                    "Warning: NumberInput value below has type float,"
-                    f" but format {format} displays as integer."
-                )
-            elif format[-1] == "f" and int_value:
-                import streamlit as st
+        # Warn user if they format an int type as a float or vice versa.
+        if format in ["%d", "%u", "%i"] and float_value:
+            import streamlit as st
 
-                st.warning(
-                    "Warning: NumberInput value below has type int so is"
-                    f" displayed as int despite format string {format}."
-                )
+            st.warning(
+                "Warning: NumberInput value below has type float,"
+                f" but format {format} displays as integer."
+            )
+        elif format[-1] == "f" and int_value:
+            import streamlit as st
+
+            st.warning(
+                "Warning: NumberInput value below has type int so is"
+                f" displayed as int despite format string {format}."
+            )
 
         if step is None:
             step = 1 if int_value else 0.01
@@ -276,8 +267,7 @@ class NumberInputMixin:
             float(format % 2)
         except (TypeError, ValueError):
             raise StreamlitAPIException(
-                "Format string for st.number_input contains invalid characters: %s"
-                % format
+                f"Format string for st.number_input contains invalid characters: {format}"
             )
 
         # Ensure that the value matches arguments' types.

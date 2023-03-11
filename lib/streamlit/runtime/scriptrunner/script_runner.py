@@ -427,7 +427,7 @@ class ScriptRunner:
 
         if rerun_data.page_script_hash:
             current_page_info = pages.get(rerun_data.page_script_hash, None)
-        elif not rerun_data.page_script_hash and rerun_data.page_name:
+        elif rerun_data.page_name:
             # If a user navigates directly to a non-main page of an app, we get
             # the first script run request before the list of pages has been
             # sent to the frontend. In this case, we choose the first script

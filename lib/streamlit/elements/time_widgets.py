@@ -61,7 +61,7 @@ def _parse_date_value(value: DateValue) -> Tuple[List[date], bool]:
     elif isinstance(value, date):
         parsed_dates = [value]
     elif isinstance(value, (list, tuple)):
-        if not len(value) in (0, 1, 2):
+        if len(value) not in {0, 1, 2}:
             raise StreamlitAPIException(
                 "DateInput value should either be an date/datetime or a list/tuple of "
                 "0 - 2 date/datetime values"
@@ -201,9 +201,11 @@ class DateInputSerde:
         else:
             return_value = self.value.value
 
-        if not self.value.is_range:
-            return return_value[0]
-        return cast(DateWidgetReturn, tuple(return_value))
+        return (
+            cast(DateWidgetReturn, tuple(return_value))
+            if self.value.is_range
+            else return_value[0]
+        )
 
     def serialize(self, v: DateWidgetReturn) -> List[str]:
         to_serialize = list(v) if isinstance(v, (list, tuple)) else [v]

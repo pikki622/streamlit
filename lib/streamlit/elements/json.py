@@ -26,9 +26,7 @@ if TYPE_CHECKING:
 
 def _ensure_serialization(o: object) -> Union[str, List[Any]]:
     """A repr function for json.dumps default arg, which tries to serialize sets as lists"""
-    if isinstance(o, set):
-        return list(o)
-    return repr(o)
+    return list(o) if isinstance(o, set) else repr(o)
 
 
 class JsonMixin:

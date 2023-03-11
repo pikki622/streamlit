@@ -103,11 +103,11 @@ def clean_filename(name: str) -> str:
     underscores; and remove anything that is not an alphanumeric, dash,
     underscore, or dot.
     """
-    s = str(name).strip().replace(" ", "_")
+    s = name.strip().replace(" ", "_")
     s = re.sub(r"(?u)[^-\w.]", "", s)
 
     if s in {"", ".", ".."}:
-        raise StreamlitAPIException("Could not derive file name from '%s'" % name)
+        raise StreamlitAPIException(f"Could not derive file name from '{name}'")
     return s
 
 
@@ -131,10 +131,11 @@ def append_date_time_to_string(input_string: str) -> str:
     """
     now = datetime.now()
 
-    if not input_string:
-        return now.strftime("%Y-%m-%d_%H-%M-%S")
-    else:
-        return f'{input_string}_{now.strftime("%Y-%m-%d_%H-%M-%S")}'
+    return (
+        f'{input_string}_{now.strftime("%Y-%m-%d_%H-%M-%S")}'
+        if input_string
+        else now.strftime("%Y-%m-%d_%H-%M-%S")
+    )
 
 
 def generate_download_filename_from_title(title_string: str) -> str:

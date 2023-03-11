@@ -575,7 +575,7 @@ class DeltaGeneratorWriteTest(DeltaGeneratorTestCase):
 
     def test_st_json_generator_is_serialized_as_string(self):
         """Test st.json serializes generator as string"""
-        json_data = (c for c in "foo")
+        json_data = iter("foo")
         st.json(json_data)
         element = self.get_delta_from_queue().new_element
         parsed_element = json.loads(element.json.body)

@@ -161,8 +161,7 @@ def user_key_from_widget_id(widget_id: str) -> Optional[str]:
     string representation of the no-user-key sentinel as part of the widget id.
     """
     user_key = widget_id.split("-", maxsplit=2)[-1]
-    user_key = None if user_key == "None" else user_key
-    return user_key
+    return None if user_key == "None" else user_key
 
 
 def is_widget_id(key: str) -> bool:

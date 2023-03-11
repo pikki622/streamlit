@@ -168,7 +168,7 @@ def _on_server_start(server: Server) -> None:
     try:
         secrets.load_if_toml_exists()
     except Exception as ex:
-        LOGGER.error(f"Failed to load secrets.toml file", exc_info=ex)
+        LOGGER.error("Failed to load secrets.toml file", exc_info=ex)
 
     def maybe_open_browser():
         if config.get_option("server.headless"):
@@ -253,12 +253,10 @@ def _print_url(is_running_hello: bool) -> None:
         ]
 
     elif config.get_option("server.headless"):
-        internal_ip = net_util.get_internal_ip()
-        if internal_ip:
+        if internal_ip := net_util.get_internal_ip():
             named_urls.append(("Network URL", server_util.get_url(internal_ip)))
 
-        external_ip = net_util.get_external_ip()
-        if external_ip:
+        if external_ip := net_util.get_external_ip():
             named_urls.append(("External URL", server_util.get_url(external_ip)))
 
     else:
@@ -266,12 +264,11 @@ def _print_url(is_running_hello: bool) -> None:
             ("Local URL", server_util.get_url("localhost")),
         ]
 
-        internal_ip = net_util.get_internal_ip()
-        if internal_ip:
+        if internal_ip := net_util.get_internal_ip():
             named_urls.append(("Network URL", server_util.get_url(internal_ip)))
 
     click.secho("")
-    click.secho("  %s" % title_message, fg="blue", bold=True)
+    click.secho(f"  {title_message}", fg="blue", bold=True)
     click.secho("")
 
     for url_name, url in named_urls:

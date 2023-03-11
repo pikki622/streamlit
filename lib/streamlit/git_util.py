@@ -78,24 +78,19 @@ class GitRepo:
 
     @property
     def untracked_files(self):
-        if not self.is_valid():
-            return None
-
-        return self.repo.untracked_files
+        return self.repo.untracked_files if self.is_valid() else None
 
     @property
     def is_head_detached(self):
-        if not self.is_valid():
-            return False
-
-        return self.repo.head.is_detached
+        return self.repo.head.is_detached if self.is_valid() else False
 
     @property
     def uncommitted_files(self):
-        if not self.is_valid():
-            return None
-
-        return [item.a_path for item in self.repo.index.diff(None)]
+        return (
+            [item.a_path for item in self.repo.index.diff(None)]
+            if self.is_valid()
+            else None
+        )
 
     @property
     def ahead_commits(self):
@@ -108,7 +103,7 @@ class GitRepo:
 
             return list(self.repo.iter_commits(f"{remote_branch}..{branch_name}"))
         except Exception:
-            return list()
+            return []
 
     def get_tracking_branch_remote(self):
         if not self.is_valid():
@@ -134,14 +129,13 @@ class GitRepo:
 
         remote, _branch = remote_info
 
-        for url in remote.urls:
-            if (
+        return any(
+            (
                 re.match(GITHUB_HTTP_URL, url) is not None
                 or re.match(GITHUB_SSH_URL, url) is not None
-            ):
-                return True
-
-        return False
+            )
+            for url in remote.urls
+        )
 
     def get_repo_info(self):
         if not self.is_valid():
@@ -158,14 +152,11 @@ class GitRepo:
             https_matches = re.match(GITHUB_HTTP_URL, url)
             ssh_matches = re.match(GITHUB_SSH_URL, url)
             if https_matches is not None:
-                repo = f"{https_matches.group(2)}/{https_matches.group(3)}"
+                repo = f"{https_matches[2]}/{https_matches[3]}"
                 break
 
             if ssh_matches is not None:
-                repo = f"{ssh_matches.group(1)}/{ssh_matches.group(2)}"
+                repo = f"{ssh_matches[1]}/{ssh_matches[2]}"
                 break
 
-        if repo is None:
-            return None
-
-        return repo, branch, self.module
+        return None if repo is None else (repo, branch, self.module)

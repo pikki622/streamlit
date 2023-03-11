@@ -65,7 +65,7 @@ class AppStaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
                 (
                     r"/app/static/(.*)",
                     AppStaticFileHandler,
-                    {"path": "%s/" % self._tmpdir.name},
+                    {"path": f"{self._tmpdir.name}/"},
                 )
             ]
         )

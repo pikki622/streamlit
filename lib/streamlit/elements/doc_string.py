@@ -86,23 +86,14 @@ def _marshall(doc_string_proto: DocStringProto, obj: Any) -> None:
 
     See DeltaGenerator.help for docs.
     """
-    try:
+    with contextlib.suppress(AttributeError):
         doc_string_proto.name = obj.__name__
-    except AttributeError:
-        # Some objects might not have a __name__ attribute.
-        # In that case we just don't set the name.
-        pass
-
     module_name = getattr(obj, "__module__", None)
 
     if module_name in CONFUSING_STREAMLIT_MODULES:
         doc_string_proto.module = "streamlit"
     elif module_name is not None:
         doc_string_proto.module = module_name
-    else:
-        # Leave doc_string_proto.module as an empty string (default value).
-        pass
-
     obj_type = type(obj)
     doc_string_proto.type = str(obj_type)
 

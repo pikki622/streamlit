@@ -77,9 +77,7 @@ def current_form_id(dg: DeltaGenerator) -> str:
     assigned to protobuf message fields, and None is not valid.)
     """
     form_data = _current_form(dg)
-    if form_data is None:
-        return ""
-    return form_data.form_id
+    return "" if form_data is None else form_data.form_id
 
 
 def is_in_form(dg: DeltaGenerator) -> bool:
@@ -196,8 +194,7 @@ class FormMixin:
             if new_form_id:
                 ctx.form_ids_this_run.add(form_id)
             else:
-                raise StreamlitAPIException(_build_duplicate_form_message(key))
-
+                raise StreamlitAPIException(_build_duplicate_form_message(form_id))
         block_proto = Block_pb2.Block()
         block_proto.form.form_id = form_id
         block_proto.form.clear_on_submit = clear_on_submit

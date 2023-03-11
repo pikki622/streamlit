@@ -45,18 +45,8 @@ def get_encoded_file_data(data, encoding="auto"):
 
     """
     if encoding == "auto":
-        if is_binary_string(data):
-            encoding = None
-        else:
-            # If the file does not look like a pure binary file, assume
-            # it's utf-8. It would be great if we could guess it a little
-            # more smartly here, but it is what it is!
-            encoding = "utf-8"
-
-    if encoding:
-        return io.StringIO(data.decode(encoding))
-
-    return io.BytesIO(data)
+        encoding = None if is_binary_string(data) else "utf-8"
+    return io.StringIO(data.decode(encoding)) if encoding else io.BytesIO(data)
 
 
 @contextlib.contextmanager
@@ -75,7 +65,7 @@ def streamlit_read(path, binary=False):
     """
     filename = get_streamlit_file_path(path)
     if os.stat(filename).st_size == 0:
-        raise util.Error('Read zero byte file: "%s"' % filename)
+        raise util.Error(f'Read zero byte file: "{filename}"')
 
     mode = "r"
     if binary:
@@ -107,7 +97,7 @@ def streamlit_write(path, binary=False):
         with open(path, mode) as handle:
             yield handle
     except OSError as e:
-        msg = ["Unable to write file: %s" % os.path.abspath(path)]
+        msg = [f"Unable to write file: {os.path.abspath(path)}"]
         if e.errno == errno.EINVAL and env_util.IS_DARWIN:
             msg.append(
                 "Python is limited to files below 2GB on OSX. "
@@ -170,12 +160,8 @@ def file_is_in_folder_glob(filepath, folderpath_glob) -> bool:
     # Make the glob always end with "/*" so we match files inside subfolders of
     # folderpath_glob.
     if not folderpath_glob.endswith("*"):
-        if folderpath_glob.endswith("/"):
-            folderpath_glob += "*"
-        else:
-            folderpath_glob += "/*"
-
-    file_dir = os.path.dirname(filepath) + "/"
+        folderpath_glob += "*" if folderpath_glob.endswith("/") else "/*"
+    file_dir = f"{os.path.dirname(filepath)}/"
     return fnmatch.fnmatch(file_dir, folderpath_glob)
 
 

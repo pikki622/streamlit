@@ -292,9 +292,7 @@ def _is_date_column(df: pd.DataFrame, name: Hashable) -> bool:
 
     """
     column = df[name]
-    if column.size == 0:
-        return False
-    return isinstance(column[0], date)
+    return False if column.size == 0 else isinstance(column[0], date)
 
 
 def generate_chart(chart_type, data, width: int = 0, height: int = 0):
@@ -322,11 +320,7 @@ To be able to use pyarrow tables, please enable pyarrow by changing the config s
 
     data = pd.melt(data.reset_index(), id_vars=[index_name])
 
-    if chart_type == "area":
-        opacity = {"value": 0.7}
-    else:
-        opacity = {"value": 1.0}
-
+    opacity = {"value": 0.7} if chart_type == "area" else {"value": 1.0}
     # Set the X and Y axes' scale to "utc" if they contain date values.
     # This causes time data to be displayed in UTC, rather the user's local
     # time zone. (By default, vega-lite displays time data in the browser's
@@ -343,8 +337,10 @@ To be able to use pyarrow tables, please enable pyarrow by changing the config s
     if chart_type == "bar" and not _is_date_column(data, index_name):
         x_type = "ordinal"
 
-    chart = (
-        getattr(alt.Chart(data, width=width, height=height), "mark_" + chart_type)()
+    return (
+        getattr(
+            alt.Chart(data, width=width, height=height), "mark_" + chart_type
+        )()
         .encode(
             alt.X(index_name, title="", scale=x_scale, type=x_type),
             alt.Y("value", title="", scale=y_scale),
@@ -354,7 +350,6 @@ To be able to use pyarrow tables, please enable pyarrow by changing the config s
         )
         .interactive()
     )
-    return chart
 
 
 def marshall(
@@ -377,7 +372,7 @@ def marshall(
         object id.
         """
         datasets[id(data)] = data
-        return {"name": str(id(data))}
+        return {"name": id(data)}
 
     alt.data_transformers.register("id", id_transform)
 

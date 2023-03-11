@@ -124,25 +124,18 @@ def _key(obj: Optional[Any]) -> Any:
 
     def is_simple(obj):
         return (
-            isinstance(obj, bytes)
-            or isinstance(obj, bytearray)
-            or isinstance(obj, str)
-            or isinstance(obj, float)
-            or isinstance(obj, int)
-            or isinstance(obj, bool)
+            isinstance(obj, (bytes, bytearray, str, float, int, bool))
             or obj is None
         )
 
     if is_simple(obj):
         return obj
 
-    if isinstance(obj, tuple):
-        if all(map(is_simple, obj)):
-            return obj
+    if isinstance(obj, tuple) and all(map(is_simple, obj)):
+        return obj
 
-    if isinstance(obj, list):
-        if all(map(is_simple, obj)):
-            return ("__l", tuple(obj))
+    if isinstance(obj, list) and all(map(is_simple, obj)):
+        return ("__l", tuple(obj))
 
     if (
         type_util.is_type(obj, "pandas.core.frame.DataFrame")
@@ -176,9 +169,8 @@ class _CacheFuncHasher:
         key = (tname, _key(obj))
 
         # Memoize if possible.
-        if key[1] is not NoResult:
-            if key in self._hashes:
-                return self._hashes[key]
+        if key[1] is not NoResult and key in self._hashes:
+            return self._hashes[key]
 
         # Break recursive cycles.
         if obj in hash_stacks.current:
@@ -221,7 +213,7 @@ class _CacheFuncHasher:
             # deep, so we don't try to hash them at all.
             return self.to_bytes(id(obj))
 
-        elif isinstance(obj, bytes) or isinstance(obj, bytearray):
+        elif isinstance(obj, (bytes, bytearray)):
             return obj
 
         elif isinstance(obj, str):
@@ -316,9 +308,7 @@ class _CacheFuncHasher:
             return h.digest()
 
         elif hasattr(obj, "name") and (
-            isinstance(obj, io.IOBase)
-            # Handle temporary files used during testing
-            or isinstance(obj, tempfile._TemporaryFileWrapper)
+            isinstance(obj, (io.IOBase, tempfile._TemporaryFileWrapper))
         ):
             # Hash files as name + last modification date + offset.
             # NB: we're using hasattr("name") to differentiate between
@@ -335,7 +325,7 @@ class _CacheFuncHasher:
         elif isinstance(obj, Pattern):
             return self.to_bytes([obj.pattern, obj.flags])
 
-        elif isinstance(obj, io.StringIO) or isinstance(obj, io.BytesIO):
+        elif isinstance(obj, (io.StringIO, io.BytesIO)):
             # Hash in-memory StringIO/BytesIO by their full contents
             # and seek position.
             h = hashlib.new("md5")

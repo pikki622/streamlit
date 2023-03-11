@@ -88,7 +88,7 @@ def show(*args: Any) -> None:
         for idx, input in enumerate(inputs):
             escaped = string_util.escape_markdown(input)
 
-            st.markdown("**%s**" % escaped)
+            st.markdown(f"**{escaped}**")
             st.write(args[idx])
 
     except Exception as raised_exc:

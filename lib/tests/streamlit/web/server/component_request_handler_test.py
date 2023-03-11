@@ -44,7 +44,7 @@ class ComponentRequestHandlerTest(tornado.testing.AsyncHTTPTestCase):
         )
 
     def _request_component(self, path):
-        return self.fetch("/component/%s" % path, method="GET")
+        return self.fetch(f"/component/{path}", method="GET")
 
     def test_success_request(self):
         """Test request success when valid parameters are provided."""
@@ -144,9 +144,8 @@ class ComponentRequestHandlerTest(tornado.testing.AsyncHTTPTestCase):
         def _open_read(m, payload):
             is_binary = False
             args, kwargs = m.call_args
-            if len(args) > 1:
-                if "b" in args[1]:
-                    is_binary = True
+            if len(args) > 1 and "b" in args[1]:
+                is_binary = True
             encoding = "utf-8"
             if "encoding" in kwargs:
                 encoding = kwargs["encoding"]

@@ -73,11 +73,11 @@ class MediaFileHandler(tornado.web.StaticFileHandler):
                 # Check that the value can be encoded in latin1. Latin1 is
                 # the default encoding for headers.
                 filename.encode("latin1")
-                file_expr = 'filename="{}"'.format(filename)
+                file_expr = f'filename="{filename}"'
             except UnicodeEncodeError:
                 # RFC5987 syntax.
                 # See: https://datatracker.ietf.org/doc/html/rfc5987
-                file_expr = "filename*=utf-8''{}".format(quote(filename))
+                file_expr = f"filename*=utf-8''{quote(filename)}"
 
             self.set_header("Content-Disposition", f"attachment; {file_expr}")
 
@@ -133,11 +133,10 @@ class MediaFileHandler(tornado.web.StaticFileHandler):
             "MediaFileHandler: Sending %s file %s", media_file.mimetype, abspath
         )
 
-        # If there is no start and end, just return the full content
-        if start is None and end is None:
-            return media_file.content
-
         if start is None:
+            if end is None:
+                return media_file.content
+
             start = 0
         if end is None:
             end = len(media_file.content)

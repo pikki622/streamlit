@@ -203,10 +203,10 @@ def main_run(target: str, args=None, **kwargs):
             target = url_util.process_gitblob_url(target)
             _download_remote(main_script_path, target)
             _main_run(main_script_path, args, flag_options=kwargs)
-    else:
-        if not os.path.exists(target):
-            raise click.BadParameter(f"File does not exist: {target}")
+    elif os.path.exists(target):
         _main_run(target, args, flag_options=kwargs)
+    else:
+        raise click.BadParameter(f"File does not exist: {target}")
 
 
 def _get_command_line_as_string() -> Optional[str]:

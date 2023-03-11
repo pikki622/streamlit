@@ -18,6 +18,5 @@ with st.form("my_form"):
     st.write("Inside the form")
     slider_val = st.slider("Form slider")
     checkbox_val = st.checkbox("Form checkbox")
-    submitted = st.form_submit_button("Submit", use_container_width=True)
-    if submitted:
+    if submitted := st.form_submit_button("Submit", use_container_width=True):
         st.write("slider", slider_val, "checkbox", checkbox_val)

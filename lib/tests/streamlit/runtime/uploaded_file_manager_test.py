@@ -266,7 +266,7 @@ class UploadedFileManagerThreadingTest(unittest.TestCase):
             file = UploadedFileRec(id=0, name=f"file_{ii}", type="type", data=b"123")
             inactive_file_ids.append(self.mgr.add_file("session", "widget", file).id)
 
-        newest_file_id = inactive_file_ids[len(inactive_file_ids) - 1] + 1
+        newest_file_id = inactive_file_ids[-1] + 1
 
         # Call `remove_orphaned_files` from each thread.
         # Our active_files should remain intact, and our orphans should be removed!

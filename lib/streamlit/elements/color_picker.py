@@ -42,7 +42,7 @@ class ColorPickerSerde:
     value: str
 
     def serialize(self, v: str) -> str:
-        return str(v)
+        return v
 
     def deserialize(self, ui_value: Optional[str], widget_id: str = "") -> str:
         return str(ui_value if ui_value is not None else self.value)

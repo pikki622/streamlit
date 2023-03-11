@@ -170,24 +170,13 @@ def _get_st_write_from_expr(node, i, parent_type):
     # "np.random.randn(1000, 2),"
     if type(node.value) is ast.Tuple:
         args = node.value.elts
-        st_write = _build_st_write_call(args)
-
-    # st.write all strings.
     elif type(node.value) is ast.Str:
         args = [node.value]
-        st_write = _build_st_write_call(args)
-
-    # st.write all variables.
     elif type(node.value) is ast.Name:
         args = [node.value]
-        st_write = _build_st_write_call(args)
-
-    # st.write everything else
     else:
         args = [node.value]
-        st_write = _build_st_write_call(args)
-
-    return st_write
+    return _build_st_write_call(args)
 
 
 def _is_docstring_node(node):

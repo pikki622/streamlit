@@ -225,12 +225,11 @@ class _MemCaches(CacheStatsProvider):
             # lock during stats-gathering.
             function_caches = self._function_caches.copy()
 
-        stats = [
+        return [
             CacheStat("st_cache", cache.display_name, asizeof(c))
             for cache in function_caches.values()
             for c in cache.cache
         ]
-        return stats
 
 
 # Our singleton _MemCaches instance
@@ -369,7 +368,7 @@ def _get_output_hash(
 
 
 def _read_from_disk_cache(key: str) -> Any:
-    path = file_util.get_streamlit_file_path("cache", "%s.pickle" % key)
+    path = file_util.get_streamlit_file_path("cache", f"{key}.pickle")
     try:
         with file_util.streamlit_read(path, binary=True) as input:
             entry = pickle.load(input)
@@ -377,7 +376,7 @@ def _read_from_disk_cache(key: str) -> Any:
             _LOGGER.debug("Disk cache HIT: %s", type(value))
     except util.Error as e:
         _LOGGER.error(e)
-        raise CacheError("Unable to read from cache: %s" % e)
+        raise CacheError(f"Unable to read from cache: {e}")
 
     except FileNotFoundError:
         raise CacheKeyNotFoundError("Key not found in disk cache")
@@ -385,7 +384,7 @@ def _read_from_disk_cache(key: str) -> Any:
 
 
 def _write_to_disk_cache(key: str, value: Any) -> None:
-    path = file_util.get_streamlit_file_path("cache", "%s.pickle" % key)
+    path = file_util.get_streamlit_file_path("cache", f"{key}.pickle")
 
     try:
         with file_util.streamlit_write(path, binary=True) as output:
@@ -394,12 +393,9 @@ def _write_to_disk_cache(key: str, value: Any) -> None:
     except util.Error as e:
         _LOGGER.debug(e)
         # Clean up file so we don't leave zero byte files.
-        try:
+        with contextlib.suppress(IOError, OSError):
             os.remove(path)
-        except (FileNotFoundError, IOError, OSError):
-            # If we can't remove the file, it's not a big deal.
-            pass
-        raise CacheError("Unable to write to cache: %s" % e)
+        raise CacheError(f"Unable to write to cache: {e}")
 
 
 def _read_from_cache(
@@ -621,10 +617,10 @@ def cache(
 
         name = non_optional_func.__qualname__
 
-        if len(args) == 0 and len(kwargs) == 0:
-            message = "Running `%s()`." % name
+        if not args and not kwargs:
+            message = f"Running `{name}()`."
         else:
-            message = "Running `%s(...)`." % name
+            message = f"Running `{name}(...)`."
 
         def get_or_create_cached_value():
             nonlocal cache_key
@@ -670,7 +666,7 @@ def cache(
 
             # Avoid recomputing the body's hash by just appending the
             # previously-computed hash to the arg hash.
-            value_key = "%s-%s" % (value_key, cache_key)
+            value_key = f"{value_key}-{cache_key}"
 
             _LOGGER.debug("Cache key: %s", value_key)
 
@@ -718,12 +714,8 @@ def cache(
 
     # Make this a well-behaved decorator by preserving important function
     # attributes.
-    try:
+    with contextlib.suppress(AttributeError):
         wrapped_func.__dict__.update(non_optional_func.__dict__)
-    except AttributeError:
-        # For normal functions this should never happen, but if so it's not problematic.
-        pass
-
     return cast(F, wrapped_func)
 
 
@@ -839,7 +831,7 @@ class CachedStFunctionWarning(StreamlitAPIWarning):
 
     def _get_message(self, st_func_name, cached_func):
         args = {
-            "st_func_name": "`st.%s()` or `st.write()`" % st_func_name,
+            "st_func_name": f"`st.{st_func_name}()` or `st.write()`",
             "func_name": _get_cached_func_name_md(cached_func),
         }
 
@@ -890,6 +882,6 @@ For more information and detailed solutions check out [our documentation.]
 def _get_cached_func_name_md(func: Callable[..., Any]) -> str:
     """Get markdown representation of the function name."""
     if hasattr(func, "__name__"):
-        return "`%s()`" % func.__name__
+        return f"`{func.__name__}()`"
     else:
         return "a cached function"

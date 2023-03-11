@@ -286,9 +286,7 @@ class DeltaGenerator(
         return util.repr_(self)
 
     def __enter__(self) -> None:
-        # with block started
-        ctx = get_script_run_ctx()
-        if ctx:
+        if ctx := get_script_run_ctx():
             ctx.dg_stack.append(self)
 
     def __exit__(
@@ -372,7 +370,7 @@ class DeltaGenerator(
             current_dg = current_dg._parent
 
     def _count_num_of_parent_columns(self, parent_block_types: ParentBlockTypes) -> int:
-        return sum(1 for parent_block in parent_block_types if parent_block == "column")
+        return sum(parent_block == "column" for parent_block in parent_block_types)
 
     @property
     def _cursor(self) -> Cursor | None:
@@ -391,7 +389,7 @@ class DeltaGenerator(
 
     @property
     def id(self) -> str:
-        return str(id(self))
+        return id(self)
 
     def _get_delta_path_str(self) -> str:
         """Returns the element's delta path as a string like "[0, 2, 3, 1]".
@@ -712,12 +710,10 @@ class DeltaGenerator(
             raise StreamlitAPIException("Only existing elements can `add_rows`.")
 
         # Accept syntax st._legacy_add_rows(df).
-        if data is not None and len(kwargs) == 0:
+        if data is not None and not kwargs:
             name = ""
-        # Accept syntax st._legacy_add_rows(foo=df).
         elif len(kwargs) == 1:
             name, data = kwargs.popitem()
-        # Raise error otherwise.
         else:
             raise StreamlitAPIException(
                 "Wrong number of arguments to add_rows()."
@@ -828,12 +824,10 @@ class DeltaGenerator(
             raise StreamlitAPIException("Only existing elements can `add_rows`.")
 
         # Accept syntax st._arrow_add_rows(df).
-        if data is not None and len(kwargs) == 0:
+        if data is not None and not kwargs:
             name = ""
-        # Accept syntax st._arrow_add_rows(foo=df).
         elif len(kwargs) == 1:
             name, data = kwargs.popitem()
-        # Raise error otherwise.
         else:
             raise StreamlitAPIException(
                 "Wrong number of arguments to add_rows()."
@@ -920,14 +914,14 @@ def _maybe_melt_data_for_add_rows(
         delta_type in DELTA_TYPES_THAT_MELT_DATAFRAMES
         or delta_type in ARROW_DELTA_TYPES_THAT_MELT_DATAFRAMES
     ):
-        if not isinstance(data, pd.DataFrame):
-            return _melt_data(
+        return (
+            _melt_data(df=data, last_index=last_index)
+            if isinstance(data, pd.DataFrame)
+            else _melt_data(
                 df=type_util.convert_anything_to_df(data),
                 last_index=last_index,
             )
-        else:
-            return _melt_data(df=data, last_index=last_index)
-
+        )
     return data, last_index
 
 
@@ -978,9 +972,7 @@ def _value_or_dg(
     """
     if value is NoValue:
         return None
-    if value is None:
-        return dg
-    return cast(Value, value)
+    return dg if value is None else cast(Value, value)
 
 
 def _enqueue_message(msg: ForwardMsg_pb2.ForwardMsg) -> None:

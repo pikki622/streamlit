@@ -117,22 +117,21 @@ class LocalDiskCacheStorage(CacheStorage):
         raise CacheStorageKeyNotFoundError if not found, or not configured
         with persist="disk"
         """
-        if self.persist == "disk":
-            path = self._get_cache_file_path(key)
-            try:
-                with streamlit_read(path, binary=True) as input:
-                    value = input.read()
-                    _LOGGER.debug("Disk cache HIT: %s", key)
-                    return bytes(value)
-            except FileNotFoundError:
-                raise CacheStorageKeyNotFoundError("Key not found in disk cache")
-            except Exception as ex:
-                _LOGGER.error(ex)
-                raise CacheStorageError("Unable to read from cache") from ex
-        else:
+        if self.persist != "disk":
             raise CacheStorageKeyNotFoundError(
                 f"Local disk cache storage is disabled (persist={self.persist})"
             )
+        path = self._get_cache_file_path(key)
+        try:
+            with streamlit_read(path, binary=True) as input:
+                value = input.read()
+                _LOGGER.debug("Disk cache HIT: %s", key)
+                return bytes(value)
+        except FileNotFoundError:
+            raise CacheStorageKeyNotFoundError("Key not found in disk cache")
+        except Exception as ex:
+            _LOGGER.error(ex)
+            raise CacheStorageError("Unable to read from cache") from ex
 
     def set(self, key: str, value: bytes) -> None:
         """Sets the value for a given key"""
@@ -146,7 +145,7 @@ class LocalDiskCacheStorage(CacheStorage):
                 # Clean up file so we don't leave zero byte files.
                 try:
                     os.remove(path)
-                except (FileNotFoundError, IOError, OSError):
+                except (IOError, OSError):
                     # If we can't remove the file, it's not a big deal.
                     pass
                 raise CacheStorageError("Unable to write to cache") from e

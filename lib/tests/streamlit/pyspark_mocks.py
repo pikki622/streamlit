@@ -73,9 +73,7 @@ class DataFrame:
 
     def toPandas(self):
         self._lazy_evaluation()
-        if self._limit > 0:
-            return self._data.head(self._limit)
-        return self._data
+        return self._data.head(self._limit) if self._limit > 0 else self._data
 
 
 def create_pyspark_dataframe_with_mocked_personal_data() -> PySparkDataFrame:

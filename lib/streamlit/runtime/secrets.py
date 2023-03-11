@@ -65,10 +65,7 @@ class AttrDict(Mapping[str, Any]):
 
     @staticmethod
     def _maybe_wrap_in_attr_dict(value) -> Any:
-        if not isinstance(value, Mapping):
-            return value
-        else:
-            return AttrDict(value)
+        return AttrDict(value) if isinstance(value, Mapping) else value
 
     def __len__(self) -> int:
         return len(self.__nested_secrets__)
@@ -247,13 +244,7 @@ class Secrets(Mapping[str, Any]):
         """
         try:
             value = self._parse(True)[key]
-            if not isinstance(value, Mapping):
-                return value
-            else:
-                return AttrDict(value)
-        # We add FileNotFoundError since __getattr__ is expected to only raise
-        # AttributeError. Without handling FileNotFoundError, unittests.mocks
-        # fails during mock creation on Python3.9
+            return AttrDict(value) if isinstance(value, Mapping) else value
         except (KeyError, FileNotFoundError):
             raise AttributeError(_missing_attr_error_message(key))
 
@@ -265,10 +256,7 @@ class Secrets(Mapping[str, Any]):
         """
         try:
             value = self._parse(True)[key]
-            if not isinstance(value, Mapping):
-                return value
-            else:
-                return AttrDict(value)
+            return AttrDict(value) if isinstance(value, Mapping) else value
         except KeyError:
             raise KeyError(_missing_key_error_message(key))
 
@@ -278,9 +266,11 @@ class Secrets(Mapping[str, Any]):
         # If the runtime is initialized, display the contents of the file and
         # the file must already exist.
         """A string representation of the contents of the dict. Thread-safe."""
-        if not runtime.exists():
-            return f"{self.__class__.__name__}(file_path={self._file_path!r})"
-        return repr(self._parse(True))
+        return (
+            repr(self._parse(True))
+            if runtime.exists()
+            else f"{self.__class__.__name__}(file_path={self._file_path!r})"
+        )
 
     def __len__(self) -> int:
         """The number of entries in the dict. Thread-safe."""

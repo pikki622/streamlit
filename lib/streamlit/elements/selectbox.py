@@ -53,9 +53,7 @@ class SelectboxSerde(Generic[T]):
     index: int
 
     def serialize(self, v: object) -> int:
-        if len(self.options) == 0:
-            return 0
-        return index_(self.options, v)
+        return 0 if len(self.options) == 0 else index_(self.options, v)
 
     def deserialize(
         self,
@@ -206,7 +204,7 @@ class SelectboxMixin:
 
         if not isinstance(index, int):
             raise StreamlitAPIException(
-                "Selectbox Value has invalid type: %s" % type(index).__name__
+                f"Selectbox Value has invalid type: {type(index).__name__}"
             )
 
         if len(opt) > 0 and not 0 <= index < len(opt):

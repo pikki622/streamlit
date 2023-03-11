@@ -42,28 +42,28 @@ def send_notification():
     message_key = sys.argv[2]
     payload = None
 
-    if workflow == "nightly":
+    if workflow == "candidate":
+        payload = (
+            {"text": ":rocket: Release Candidate was successful!"}
+            if message_key == "success"
+            else {
+                "text": f":blobonfire: Release Candidate failed - <https://github.com/streamlit/streamlit/actions/runs/{run_id}|Link to run>"
+            }
+        )
+    elif workflow == "nightly":
         failure = nightly_slack_messages[message_key]
         payload = {
             "text": f":blobonfire: Nightly build failed {failure} - <https://github.com/streamlit/streamlit/actions/runs/{run_id}|Link to run>"
         }
 
-    if workflow == "candidate":
-        if message_key == "success":
-            payload = {"text": ":rocket: Release Candidate was successful!"}
-        else:
-            payload = {
-                "text": f":blobonfire: Release Candidate failed - <https://github.com/streamlit/streamlit/actions/runs/{run_id}|Link to run>"
-            }
-
-    if workflow == "release":
-        if message_key == "success":
-            payload = {"text": ":rocket: Release was successful!"}
-        else:
-            payload = {
+    elif workflow == "release":
+        payload = (
+            {"text": ":rocket: Release was successful!"}
+            if message_key == "success"
+            else {
                 "text": f":blobonfire: Release failed - <https://github.com/streamlit/streamlit/actions/runs/{run_id}|Link to run>"
             }
-
+        )
     if payload:
         response = requests.post(webhook, json=payload)
 

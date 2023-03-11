@@ -179,15 +179,13 @@ def _get_command_telemetry(
             continue
         argument = Argument(k=keyword, t=_get_type_name(arg), p=pos)
 
-        arg_metadata = _get_arg_metadata(arg)
-        if arg_metadata:
+        if arg_metadata := _get_arg_metadata(arg):
             argument.m = arg_metadata
         arguments.append(argument)
     for kwarg, kwarg_value in kwargs.items():
         argument = Argument(k=kwarg, t=_get_type_name(kwarg_value))
 
-        arg_metadata = _get_arg_metadata(kwarg_value)
-        if arg_metadata:
+        if arg_metadata := _get_arg_metadata(kwarg_value):
             argument.m = arg_metadata
         arguments.append(argument)
 

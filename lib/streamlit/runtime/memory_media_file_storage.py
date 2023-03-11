@@ -70,10 +70,7 @@ def get_extension_for_mimetype(mimetype: str) -> str:
         return PREFERRED_MIMETYPE_EXTENSION_MAP[mimetype]
 
     extension = mimetypes.guess_extension(mimetype, strict=False)
-    if extension is None:
-        return ""
-
-    return extension
+    return "" if extension is None else extension
 
 
 class MemoryFile(NamedTuple):
@@ -171,13 +168,12 @@ class MemoryMediaFileStorage(MediaFileStorage, CacheStatsProvider):
         # with other threads that may be manipulating the cache.
         files_by_id = self._files_by_id.copy()
 
-        stats: List[CacheStat] = []
-        for file_id, file in files_by_id.items():
-            stats.append(
-                CacheStat(
-                    category_name="st_memory_media_file_storage",
-                    cache_name="",
-                    byte_length=len(file.content),
-                )
+        stats: List[CacheStat] = [
+            CacheStat(
+                category_name="st_memory_media_file_storage",
+                cache_name="",
+                byte_length=len(file.content),
             )
+            for file_id, file in files_by_id.items()
+        ]
         return stats

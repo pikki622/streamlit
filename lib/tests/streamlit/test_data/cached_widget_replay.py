@@ -20,8 +20,7 @@ st.button("click to rerun")
 @st.experimental_memo(experimental_allow_widgets=True)
 def foo(i):
     options = ["foo", "bar", "baz", "qux"]
-    r = st.radio("radio", options, index=i)
-    return r
+    return st.radio("radio", options, index=i)
 
 
 r = foo(1)

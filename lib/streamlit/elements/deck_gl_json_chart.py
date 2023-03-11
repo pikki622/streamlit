@@ -143,10 +143,7 @@ def _get_pydeck_tooltip(pydeck_obj: Optional["Deck"]) -> Optional[Dict[str, str]
     # For pydeck >=0.8.1 when jupyter extra is not installed.
     # For details, see: https://github.com/visgl/deck.gl/pull/7125/files
     tooltip = getattr(pydeck_obj, "_tooltip", None)
-    if tooltip is not None and isinstance(tooltip, dict):
-        return tooltip
-
-    return None
+    return tooltip if tooltip is not None and isinstance(tooltip, dict) else None
 
 
 def marshall(
@@ -154,14 +151,9 @@ def marshall(
     pydeck_obj: Optional["Deck"],
     use_container_width: bool,
 ) -> None:
-    if pydeck_obj is None:
-        spec = json.dumps(EMPTY_MAP)
-    else:
-        spec = pydeck_obj.to_json()
-
+    spec = json.dumps(EMPTY_MAP) if pydeck_obj is None else pydeck_obj.to_json()
     pydeck_proto.json = spec
     pydeck_proto.use_container_width = use_container_width
 
-    tooltip = _get_pydeck_tooltip(pydeck_obj)
-    if tooltip:
+    if tooltip := _get_pydeck_tooltip(pydeck_obj):
         pydeck_proto.tooltip = json.dumps(tooltip)

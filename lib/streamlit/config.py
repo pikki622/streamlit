@@ -140,7 +140,7 @@ def get_option(key: str) -> Any:
         config_options = get_config_options()
 
         if key not in config_options:
-            raise RuntimeError('Config key "%s" not defined.' % key)
+            raise RuntimeError(f'Config key "{key}" not defined.')
         return config_options[key].value
 
 
@@ -163,18 +163,18 @@ def get_options_for_section(section: str) -> Dict[str, Any]:
     with _config_lock:
         config_options = get_config_options()
 
-        options_for_section = {}
-        for option in config_options.values():
-            if option.section == section:
-                options_for_section[option.name] = option.value
-        return options_for_section
+        return {
+            option.name: option.value
+            for option in config_options.values()
+            if option.section == section
+        }
 
 
 def _create_section(section: str, description: str) -> None:
     """Create a config section and store it globally in this module."""
-    assert section not in _section_descriptions, (
-        'Cannot define section "%s" twice.' % section
-    )
+    assert (
+        section not in _section_descriptions
+    ), f'Cannot define section "{section}" twice.'
     _section_descriptions[section] = description
 
 
@@ -239,11 +239,10 @@ def _create_option(
     )
     assert (
         option.section in _section_descriptions
-    ), 'Section "%s" must be one of %s.' % (
-        option.section,
-        ", ".join(_section_descriptions.keys()),
-    )
-    assert key not in _config_options_template, 'Cannot define option "%s" twice.' % key
+    ), f'Section "{option.section}" must be one of {", ".join(_section_descriptions.keys())}.'
+    assert (
+        key not in _config_options_template
+    ), f'Cannot define option "{key}" twice.'
     _config_options_template[key] = option
     return option
 
@@ -394,12 +393,11 @@ def _logger_message_format() -> str:
 
     Default: "%(asctime)s %(message)s"
     """
-    if get_option("global.developmentMode"):
-        from streamlit.logger import DEFAULT_LOG_MESSAGE
-
-        return DEFAULT_LOG_MESSAGE
-    else:
+    if not get_option("global.developmentMode"):
         return "%(asctime)s %(message)s"
+    from streamlit.logger import DEFAULT_LOG_MESSAGE
+
+    return DEFAULT_LOG_MESSAGE
 
 
 _create_option(
@@ -570,11 +568,7 @@ def _server_headless() -> bool:
         # We're running in Linux and DISPLAY is unset
         return True
 
-    if os.getenv("IS_RUNNING_IN_STREAMLIT_EDITOR_PLUGIN") is not None:
-        # We're running within the Streamlit Atom plugin
-        return True
-
-    return False
+    return os.getenv("IS_RUNNING_IN_STREAMLIT_EDITOR_PLUGIN") is not None
 
 
 _create_option(
@@ -907,7 +901,7 @@ def get_where_defined(key: str) -> str:
         config_options = get_config_options()
 
         if key not in config_options:
-            raise RuntimeError('Config key "%s" not defined.' % key)
+            raise RuntimeError(f'Config key "{key}" not defined.')
         return config_options[key].where_defined
 
 
@@ -1036,16 +1030,15 @@ def _maybe_read_env_variable(value: Any) -> Any:
         var_name = value[len("env:") :]
         env_var = os.environ.get(var_name)
 
-        if env_var is None:
-            # Import logger locally to prevent circular references
-            from streamlit.logger import get_logger
-
-            LOGGER = get_logger(__name__)
-
-            LOGGER.error("No environment variable called %s" % var_name)
-        else:
+        if env_var is not None:
             return _maybe_convert_to_number(env_var)
 
+        # Import logger locally to prevent circular references
+        from streamlit.logger import get_logger
+
+        LOGGER = get_logger(__name__)
+
+        LOGGER.error(f"No environment variable called {var_name}")
     return value
 
 
@@ -1173,10 +1166,12 @@ def _check_conflicts() -> None:
         )
 
     # XSRF conflicts
-    if get_option("server.enableXsrfProtection"):
-        if not get_option("server.enableCORS") or get_option("global.developmentMode"):
-            LOGGER.warning(
-                """
+    if get_option("server.enableXsrfProtection") and (
+        not get_option("server.enableCORS")
+        or get_option("global.developmentMode")
+    ):
+        LOGGER.warning(
+            """
 Warning: the config option 'server.enableCORS=false' is not compatible with 'server.enableXsrfProtection=true'.
 As a result, 'server.enableCORS' is being overridden to 'true'.
 
@@ -1187,7 +1182,7 @@ cross-origin resource sharing.
 
 If cross origin resource sharing is required, please disable server.enableXsrfProtection.
             """
-            )
+        )
 
 
 def _set_development_mode() -> None:

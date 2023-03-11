@@ -155,7 +155,7 @@ def marshall(
     # options with the ones from kwargs
     options = {a: kwargs.get(a, b) for a, b in options.items()}
     # Merge options back into kwargs.
-    kwargs.update(options)
+    kwargs |= options
 
     image = io.BytesIO()
     fig.savefig(image, **kwargs)

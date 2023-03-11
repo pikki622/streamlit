@@ -329,7 +329,7 @@ class ArrowAltairMixin:
         https://altair-viz.github.io/gallery/.
 
         """
-        if theme != "streamlit" and theme != None:
+        if theme not in ["streamlit", None]:
             raise StreamlitAPIException(
                 f'You set theme="{theme}" while Streamlit charts only support theme=”streamlit” or theme=None to fallback to the default library theme.'
             )
@@ -367,10 +367,7 @@ def _is_date_column(df: pd.DataFrame, name: str) -> bool:
 
     """
     column = df[name]
-    if column.size == 0:
-        return False
-
-    return isinstance(column.iloc[0], date)
+    return False if column.size == 0 else isinstance(column.iloc[0], date)
 
 
 def _melt_data(
@@ -604,7 +601,7 @@ def marshall(
         object id.
         """
         datasets[id(data)] = data
-        return {"name": str(id(data))}
+        return {"name": id(data)}
 
     alt.data_transformers.register("id", id_transform)
 

@@ -173,7 +173,8 @@ class SliderTest(DeltaGeneratorTestCase):
             max_value = JSNumber.MAX_SAFE_INTEGER + 1
             st.slider("Label", max_value=max_value)
         self.assertEqual(
-            "`max_value` (%s) must be <= (1 << 53) - 1" % str(max_value), str(exc.value)
+            f"`max_value` ({str(max_value)}) must be <= (1 << 53) - 1",
+            str(exc.value),
         )
 
         # Min int
@@ -181,7 +182,7 @@ class SliderTest(DeltaGeneratorTestCase):
             min_value = JSNumber.MIN_SAFE_INTEGER - 1
             st.slider("Label", min_value=min_value)
         self.assertEqual(
-            "`min_value` (%s) must be >= -((1 << 53) - 1)" % str(min_value),
+            f"`min_value` ({str(min_value)}) must be >= -((1 << 53) - 1)",
             str(exc.value),
         )
 
@@ -190,7 +191,7 @@ class SliderTest(DeltaGeneratorTestCase):
             max_value = 2e308
             st.slider("Label", value=0.5, max_value=max_value)
         self.assertEqual(
-            "`max_value` (%s) must be <= 1.797e+308" % str(max_value), str(exc.value)
+            f"`max_value` ({max_value}) must be <= 1.797e+308", str(exc.value)
         )
 
         # Min float
@@ -198,7 +199,7 @@ class SliderTest(DeltaGeneratorTestCase):
             min_value = -2e308
             st.slider("Label", value=0.5, min_value=min_value)
         self.assertEqual(
-            "`min_value` (%s) must be >= -1.797e+308" % str(min_value), str(exc.value)
+            f"`min_value` ({min_value}) must be >= -1.797e+308", str(exc.value)
         )
 
     def test_step_zero(self):

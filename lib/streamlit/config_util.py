@@ -26,7 +26,7 @@ def server_option_changed(
     """Return True if and only if an option in the server section differs
     between old_options and new_options.
     """
-    for opt_name in old_options.keys():
+    for opt_name in old_options:
         if not opt_name.startswith("server"):
             continue
 
@@ -75,7 +75,7 @@ def show_config(
             continue
 
         append_newline()
-        append_section("[%s]" % section)
+        append_section(f"[{section}]")
         append_newline()
 
         for key, option in config_options.items():
@@ -93,20 +93,15 @@ def show_config(
 
             for i, txt in enumerate(description_paragraphs):
                 if i == 0:
-                    append_desc("# %s" % txt)
+                    append_desc(f"# {txt}")
                 else:
-                    append_comment("# %s" % txt)
+                    append_comment(f"# {txt}")
 
             toml_default = toml.dumps({"default": option.default_val})
             toml_default = toml_default[10:].strip()
 
             if len(toml_default) > 0:
-                append_comment("# Default: %s" % toml_default)
-            else:
-                # Don't say "Default: (unset)" here because this branch applies
-                # to complex config settings too.
-                pass
-
+                append_comment(f"# Default: {toml_default}")
             if option.deprecated:
                 append_comment("#")
                 append_comment("# " + click.style("DEPRECATED.", fg="yellow"))
@@ -114,8 +109,7 @@ def show_config(
                     "# %s" % "\n".join(_clean_paragraphs(option.deprecation_text))
                 )
                 append_comment(
-                    "# This option will be removed on or after %s."
-                    % option.expiration_date
+                    f"# This option will be removed on or after {option.expiration_date}."
                 )
                 append_comment("#")
 
@@ -124,7 +118,7 @@ def show_config(
             )
 
             if option_is_manually_set:
-                append_comment("# The value below was set in %s" % option.where_defined)
+                append_comment(f"# The value below was set in {option.where_defined}")
 
             toml_setting = toml.dumps({key: option.value})
 
@@ -145,5 +139,4 @@ def _clean(txt):
 
 def _clean_paragraphs(txt):
     paragraphs = txt.split("\n\n")
-    cleaned_paragraphs = [_clean(x) for x in paragraphs]
-    return cleaned_paragraphs
+    return [_clean(x) for x in paragraphs]

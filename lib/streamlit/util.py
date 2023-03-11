@@ -81,7 +81,7 @@ def open_browser(url):
 
     import platform
 
-    raise Error('Cannot open browser in platform "%s"' % platform.system())
+    raise Error(f'Cannot open browser in platform "{platform.system()}"')
 
 
 def _open_browser_with_webbrowser(url):
@@ -98,9 +98,7 @@ def _open_browser_with_command(command, url):
 
 def _maybe_tuple_to_list(item: Any) -> Any:
     """Convert a tuple to a list. Leave as is if it's not a tuple."""
-    if isinstance(item, tuple):
-        return list(item)
-    return item
+    return list(item) if isinstance(item, tuple) else item
 
 
 def repr_(cls) -> str:
@@ -134,7 +132,7 @@ def index_(iterable: Iterable[_Value], x: _Value) -> int:
         elif isinstance(value, float) and isinstance(x, float):
             if abs(x - value) < FLOAT_EQUALITY_EPSILON:
                 return i
-    raise ValueError("{} is not in iterable".format(str(x)))
+    raise ValueError(f"{str(x)} is not in iterable")
 
 
 _Key = TypeVar("_Key", bound=str)
@@ -171,14 +169,12 @@ def extract_key_query_params(
     query_params: Dict[str, List[str]], param_key: str
 ) -> Set[str]:
     """Extracts key (case-insensitive) query params from Dict, and returns them as Set of str."""
-    return set(
-        [
-            item.lower()
-            for sublist in [
-                [value.lower() for value in query_params[key]]
-                for key in query_params.keys()
-                if key.lower() == param_key and query_params.get(key)
-            ]
-            for item in sublist
+    return {
+        item.lower()
+        for sublist in [
+            [value.lower() for value in query_params[key]]
+            for key in query_params
+            if key.lower() == param_key and query_params.get(key)
         ]
-    )
+        for item in sublist
+    }

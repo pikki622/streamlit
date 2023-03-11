@@ -133,12 +133,7 @@ class SliderSerde:
     orig_tz: Optional[tzinfo]
 
     def deserialize(self, ui_value: Optional[List[float]], widget_id: str = ""):
-        if ui_value is not None:
-            val: Any = ui_value
-        else:
-            # Widget has not been used; fallback to the original value,
-            val = self.value
-
+        val = ui_value if ui_value is not None else self.value
         # The widget always returns a float array, so fix the return type if necessary
         if self.data_type == SliderProto.INT:
             val = [int(v) for v in val]
@@ -393,7 +388,7 @@ class SliderMixin:
 
         # Ensure that the value is either a single value or a range of values.
         single_value = isinstance(value, tuple(SUPPORTED_TYPES.keys()))
-        range_value = isinstance(value, (list, tuple)) and len(value) in (0, 1, 2)
+        range_value = isinstance(value, (list, tuple)) and len(value) in {0, 1, 2}
         if not single_value and not range_value:
             raise StreamlitAPIException(
                 "Slider value should either be an int/float/datetime or a list/tuple of "

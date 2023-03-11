@@ -156,12 +156,14 @@ def _get_zoom_level(distance: float) -> int:
         The zoom level, from 0 to 20.
 
     """
-    for i in range(len(_ZOOM_LEVELS) - 1):
-        if _ZOOM_LEVELS[i + 1] < distance <= _ZOOM_LEVELS[i]:
-            return i
-
-    # For small number of points the default zoom level will be used.
-    return _DEFAULT_ZOOM_LEVEL
+    return next(
+        (
+            i
+            for i in range(len(_ZOOM_LEVELS) - 1)
+            if _ZOOM_LEVELS[i + 1] < distance <= _ZOOM_LEVELS[i]
+        ),
+        _DEFAULT_ZOOM_LEVEL,
+    )
 
 
 def to_deckgl_json(data: Data, zoom: Optional[int]) -> str:
@@ -214,21 +216,16 @@ def to_deckgl_json(data: Data, zoom: Optional[int]) -> str:
     range_lat = abs(max_lat - min_lat)
 
     if zoom is None:
-        if range_lon > range_lat:
-            longitude_distance = range_lon
-        else:
-            longitude_distance = range_lat
+        longitude_distance = max(range_lon, range_lat)
         zoom = _get_zoom_level(longitude_distance)
 
     # "+1" because itertuples includes the row index.
     lon_col_index = data.columns.get_loc(lon) + 1
     lat_col_index = data.columns.get_loc(lat) + 1
-    final_data = []
-    for row in data.itertuples():
-        final_data.append(
-            {"lon": float(row[lon_col_index]), "lat": float(row[lat_col_index])}
-        )
-
+    final_data = [
+        {"lon": float(row[lon_col_index]), "lat": float(row[lat_col_index])}
+        for row in data.itertuples()
+    ]
     default = copy.deepcopy(_DEFAULT_MAP)
     default["initialViewState"]["latitude"] = center_lat
     default["initialViewState"]["longitude"] = center_lon

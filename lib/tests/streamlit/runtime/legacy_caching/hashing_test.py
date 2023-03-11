@@ -159,7 +159,7 @@ class HashTest(unittest.TestCase):
         self.assertNotEqual(get_hash(a), get_hash(b))
 
     def test_dict(self):
-        dict_gen = {1: (x for x in range(1))}
+        dict_gen = {1: iter(range(1))}
 
         self.assertEqual(get_hash({1: 1}), get_hash({1: 1}))
         self.assertNotEqual(get_hash({1: 1}), get_hash({1: 2}))
@@ -181,6 +181,7 @@ class HashTest(unittest.TestCase):
         self.assertNotEqual(get_hash(d2), get_hash(d1))
 
     def test_reduce_(self):
+
         class A(object):
             def __init__(self):
                 self.x = [1, 2, 3]
@@ -189,9 +190,12 @@ class HashTest(unittest.TestCase):
             def __init__(self):
                 self.x = [1, 2, 3]
 
+
+
         class C(object):
             def __init__(self):
-                self.x = (x for x in range(1))
+                self.x = iter(range(1))
+
 
         self.assertEqual(get_hash(A()), get_hash(A()))
         self.assertNotEqual(get_hash(A()), get_hash(B()))
@@ -203,7 +207,7 @@ class HashTest(unittest.TestCase):
 
     def test_generator(self):
         with self.assertRaises(UnhashableTypeError):
-            get_hash((x for x in range(1)))
+            get_hash(iter(range(1)))
 
     def test_hashing_broken_code(self):
         import datetime
@@ -229,14 +233,18 @@ class HashTest(unittest.TestCase):
                 get_hash(func)
 
             exc = str(ctx.exception)
-            self.assertEqual(exc.find(exc_msg) >= 0, True)
+            self.assertEqual(exc_msg in exc, True)
             self.assertNotEqual(re.search(r"a bug in `.+` near line `\d+`", exc), None)
-            self.assertEqual(exc.find(code_msg) >= 0, True)
+            self.assertEqual(code_msg in exc, True)
 
     def test_hash_funcs_acceptable_keys(self):
+
+
+
         class C:
             def __init__(self):
-                self.x = (x for x in range(1))
+                self.x = iter(range(1))
+
 
         with self.assertRaises(UnhashableTypeError):
             get_hash(C())
@@ -485,7 +493,7 @@ class HashTest(unittest.TestCase):
     def test_non_hashable(self):
         """Test user provided hash functions."""
 
-        g = (x for x in range(1))
+        g = iter(range(1))
 
         # Unhashable object raises an error
         with self.assertRaises(UnhashableTypeError):
@@ -514,7 +522,7 @@ class HashTest(unittest.TestCase):
     def _build_cffi(self, name):
         ffibuilder = cffi.FFI()
         ffibuilder.set_source(
-            "cffi_bin._%s" % name,
+            f"cffi_bin._{name}",
             r"""
                 static int %s(int x)
                 {
@@ -524,7 +532,7 @@ class HashTest(unittest.TestCase):
             % name,
         )
 
-        ffibuilder.cdef("int %s(int);" % name)
+        ffibuilder.cdef(f"int {name}(int);")
         ffibuilder.compile(verbose=True)
 
     def test_compiled_ffi(self):
@@ -591,26 +599,22 @@ class HashTest(unittest.TestCase):
             "Database=db;Server=localhost;UID=foo;PWD=pass"
         )
 
-        self.assertEqual(
-            hash_engine(auth_url),
-            hash_engine("%s=%s" % (url, params_foo)),
-        )
+        self.assertEqual(hash_engine(auth_url), hash_engine(f"{url}={params_foo}"))
         self.assertNotEqual(
-            hash_engine("%s=%s" % (url, params_foo)),
-            hash_engine("%s=%s" % (url, params_bar)),
+            hash_engine(f"{url}={params_foo}"), hash_engine(f"{url}={params_bar}")
         )
 
         # Note: False negative because the ordering of the keys affects
         # the hash
         self.assertNotEqual(
-            hash_engine("%s=%s" % (url, params_foo)),
-            hash_engine("%s=%s" % (url, params_foo_order)),
+            hash_engine(f"{url}={params_foo}"),
+            hash_engine(f"{url}={params_foo_order}"),
         )
 
         # Note: False negative because the keys are case insensitive
         self.assertNotEqual(
-            hash_engine("%s=%s" % (url, params_foo)),
-            hash_engine("%s=%s" % (url, params_foo_caps)),
+            hash_engine(f"{url}={params_foo}"),
+            hash_engine(f"{url}={params_foo_caps}"),
         )
 
         # Note: False negative because `connect_args` doesn't affect the
@@ -633,8 +637,8 @@ class HashTest(unittest.TestCase):
         def connect():
             pass
 
-        url = "%s://localhost/db" % dialect
-        auth_url = "%s://user:pass@localhost/db" % dialect
+        url = f"{dialect}://localhost/db"
+        auth_url = f"{dialect}://user:pass@localhost/db"
 
         self.assertEqual(hash_engine(url), hash_engine(url))
         self.assertEqual(
@@ -1092,7 +1096,7 @@ class CodeHashTest(unittest.TestCase):
     def test_non_hashable(self):
         """Test the hash of functions that return non hashable objects."""
 
-        gen = (x for x in range(1))
+        gen = iter(range(1))
 
         def f(x):
             return gen

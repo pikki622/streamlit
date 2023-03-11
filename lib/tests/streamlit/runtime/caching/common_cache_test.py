@@ -73,8 +73,7 @@ def as_cached_result(value: Any, cache_type: CacheType) -> MultiCacheResults:
     result = CachedResult(value, [], st._main.id, st.sidebar.id)
     widget_key = _make_widget_key([], cache_type)
     d = {widget_key: result}
-    initial = MultiCacheResults(set(), d)
-    return initial
+    return MultiCacheResults(set(), d)
 
 
 class CommonCacheTest(DeltaGeneratorTestCase):
@@ -94,12 +93,11 @@ class CommonCacheTest(DeltaGeneratorTestCase):
 
     def get_text_delta_contents(self) -> List[str]:
         deltas = self.get_all_deltas_from_queue()
-        text = [
+        return [
             element.text.body
             for element in (delta.new_element for delta in deltas)
             if element.WhichOneof("type") == "text"
         ]
-        return text
 
     @parameterized.expand(
         [("cache_data", cache_data), ("cache_resource", cache_resource)]

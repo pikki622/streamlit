@@ -95,7 +95,7 @@ class ArrowVegaLiteMixin:
         translated to the syntax shown above.
 
         """
-        if theme != "streamlit" and theme != None:
+        if theme not in ["streamlit", None]:
             raise StreamlitAPIException(
                 f'You set theme="{theme}" while Streamlit charts only support theme=”streamlit” or theme=None to fallback to the default library theme.'
             )
@@ -137,12 +137,7 @@ def marshall(
     # Support passing no spec arg, but filling it with kwargs.
     # Example:
     #   marshall(proto, baz='boz')
-    if spec is None:
-        spec = dict()
-    else:
-        # Clone the spec dict, since we may be mutating it.
-        spec = dict(spec)
-
+    spec = {} if spec is None else dict(spec)
     # Support passing in kwargs. Example:
     #   marshall(proto, {foo: 'bar'}, baz='boz')
     if len(kwargs):
@@ -150,7 +145,7 @@ def marshall(
         # This only works for string keys, but kwarg keys are strings anyways.
         spec = dict(spec, **dicttools.unflatten(kwargs, _CHANNELS))
 
-    if len(spec) == 0:
+    if not spec:
         raise ValueError("Vega-Lite charts require a non-empty spec dict.")
 
     if "autosize" not in spec:
@@ -196,8 +191,6 @@ _CHANNELS = {
     "y",
     "x2",
     "y2",
-    "xError",
-    "yError2",
     "xError",
     "yError2",
     "longitude",

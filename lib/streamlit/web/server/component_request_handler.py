@@ -98,18 +98,12 @@ class ComponentRequestHandler(tornado.web.RequestHandler):
         # per RFC 6713, use the appropriate type for a gzip compressed file
         if encoding == "gzip":
             return "application/gzip"
-        # As of 2015-07-21 there is no bzip2 encoding defined at
-        # http://www.iana.org/assignments/media-types/media-types.xhtml
-        # So for that (and any other encoding), use octet-stream.
-        elif encoding is not None:
+        elif encoding is not None or mime_type is None:
             return "application/octet-stream"
-        elif mime_type is not None:
-            return mime_type
-        # if mime_type not detected, use application/octet-stream
         else:
-            return "application/octet-stream"
+            return mime_type
 
     @staticmethod
     def get_url(file_id: str) -> str:
         """Return the URL for a component file with the given ID."""
-        return "components/{}".format(file_id)
+        return f"components/{file_id}"

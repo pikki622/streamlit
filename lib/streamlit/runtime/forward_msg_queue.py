@@ -39,7 +39,7 @@ class ForwardMsgQueue:
         # redundant outgoing Deltas (where a newer Delta supersedes
         # an older Delta, with the same delta_path, that's still in the
         # queue).
-        self._delta_index_map: Dict[Tuple[int, ...], int] = dict()
+        self._delta_index_map: Dict[Tuple[int, ...], int] = {}
 
     def get_debug(self) -> Dict[str, Any]:
         from google.protobuf.json_format import MessageToDict
@@ -83,7 +83,7 @@ class ForwardMsgQueue:
     def clear(self) -> None:
         """Clear the queue."""
         self._queue = []
-        self._delta_index_map = dict()
+        self._delta_index_map = {}
 
     def flush(self) -> List[ForwardMsg]:
         """Clear the queue and return a list of the messages it contained
@@ -104,7 +104,7 @@ def _is_composable_message(msg: ForwardMsg) -> bool:
     # operation can raise errors, and we don't have a good way of handling
     # those errors in the message queue.
     delta_type = msg.delta.WhichOneof("type")
-    return delta_type != "add_rows" and delta_type != "arrow_add_rows"
+    return delta_type not in ["add_rows", "arrow_add_rows"]
 
 
 def _maybe_compose_deltas(old_delta: Delta, new_delta: Delta) -> Optional[Delta]:
@@ -137,7 +137,4 @@ def _maybe_compose_deltas(old_delta: Delta, new_delta: Delta) -> Optional[Delta]
     if new_delta_type == "new_element":
         return new_delta
 
-    if new_delta_type == "add_block":
-        return new_delta
-
-    return None
+    return new_delta if new_delta_type == "add_block" else None

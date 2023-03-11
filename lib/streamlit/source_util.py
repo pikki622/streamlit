@@ -57,10 +57,7 @@ def page_sort_key(script_path: Path) -> Tuple[float, str]:
     [(number, label)] = matches
     label = label.lower()
 
-    if number == "":
-        return (float("inf"), label)
-
-    return (float(number), label)
+    return (float("inf"), label) if number == "" else (float(number), label)
 
 
 def page_icon_and_name(script_path: Path) -> Tuple[str, str]:
@@ -138,7 +135,7 @@ def get_pages(main_script_path_str: str) -> Dict[str, Dict[str, str]]:
             [
                 f
                 for f in pages_dir.glob("*.py")
-                if not f.name.startswith(".") and not f.name == "__init__.py"
+                if not f.name.startswith(".") and f.name != "__init__.py"
             ],
             key=page_sort_key,
         )

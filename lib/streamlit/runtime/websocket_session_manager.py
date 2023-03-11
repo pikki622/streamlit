@@ -66,10 +66,9 @@ class WebsocketSessionManager(SessionManager):
             existing_session_id not in self._active_session_info_by_id
         ), f"session with id '{existing_session_id}' is already connected!"
 
-        session_info = existing_session_id and self._session_storage.get(
+        if session_info := existing_session_id and self._session_storage.get(
             existing_session_id
-        )
-        if session_info:
+        ):
             existing_session = session_info.session
             existing_session.register_file_watchers()
 
@@ -134,14 +133,12 @@ class WebsocketSessionManager(SessionManager):
             active_session_info.session.shutdown()
             return
 
-        session_info = self._session_storage.get(session_id)
-        if session_info:
+        if session_info := self._session_storage.get(session_id):
             self._session_storage.delete(session_id)
             session_info.session.shutdown()
 
     def get_session_info(self, session_id: str) -> Optional[SessionInfo]:
-        session_info = self.get_active_session_info(session_id)
-        if session_info:
+        if session_info := self.get_active_session_info(session_id):
             return cast(SessionInfo, session_info)
         return self._session_storage.get(session_id)
 
